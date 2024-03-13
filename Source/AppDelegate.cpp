@@ -25,6 +25,7 @@
 
 #include "AppDelegate.h"
 #include "MainScene.h"
+#include "WelcomeScene.h"
 
 #define USE_AUDIO_ENGINE 1
 
@@ -34,7 +35,7 @@
 
 USING_NS_AX;
 
-static ax::Size designResolutionSize = ax::Size(1280, 720);
+static ax::Size designResolutionSize = ax::Size(288, 512);//default (1280,720)
 
 AppDelegate::AppDelegate() {}
 
@@ -77,11 +78,19 @@ bool AppDelegate::applicationDidFinishLaunching()
     glView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height,
                                     ResolutionPolicy::SHOW_ALL);
 
+    auto sharedFileUtils = FileUtils::getInstance();
+    std::vector<std::string> searchPaths;
+
+    searchPaths.push_back("audio");
+    sharedFileUtils->setSearchPaths(searchPaths);
+
     // create a scene. it's an autorelease object
     auto scene = utils::createInstance<MainScene>();
 
+    auto welcomeScene = utils::createInstance<WelcomeScene>();
+
     // run
-    director->runWithScene(scene);
+    director->runWithScene(welcomeScene);
 
     return true;
 }
