@@ -29,9 +29,9 @@ public:
 
     bool initWithDuration(float duration, ax::Vec2 magnitude);
 
-    /*AX_CONSTRUCTOR_ACCESS:
-            Shake() { }
-    virtual ~Shake() { }*/
+
+    Shake() { }
+    virtual ~Shake() { }
 
 private:
     AX_DISALLOW_COPY_AND_ASSIGN(Shake);

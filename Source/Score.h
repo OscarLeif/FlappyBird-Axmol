@@ -20,9 +20,9 @@ public:
     void reset();
     void updateScore();
     int getTopScore();
-    //CC_CONSTRUCTOR_ACCESS:
+    //AX_CONSTRUCTOR_ACCESS:
     //        Score();
-    ~Score();
+    //~Score();
 private:
     int _score;
     Label* _scoreLabel;

@@ -2,67 +2,59 @@
 // Created by oscar on 3/13/2024.
 //
 
-#include "Score.h"
+#include "Shake.h"
 
-Score* Score::create()
+Shake* Shake::create(float duration, float magnitude)
 {
-    Score* score = new (std::nothrow) Score();
-    if (score && score->init())
-    {
-        score->autorelease();
-        return score;
+    return create(duration, Vec2(magnitude, magnitude));
+}
+
+Shake* Shake::create(float duration, Vec2 magnitude)
+{
+    Shake* action = new Shake();
+    if (action && action->initWithDuration(duration, magnitude)) {
+        action->autorelease();
+        return action;
     }
-    AX_SAFE_DELETE(score);
+    AX_SAFE_DELETE(action);
     return nullptr;
 }
 
-bool Score::init()
+Shake* Shake::clone() const
 {
-    if (!Node::init())
-        return false;
-
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    _score = 0;
-
-    _scoreLabel = Label::createWithBMFont("font.fnt", "0");
-    _scoreLabel->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*0.92f + origin.y));
-    addChild(_scoreLabel);
-    return true;
+    return create(_duration, _magnitude);
 }
 
-void Score::addScore()
+Shake* Shake::reverse() const
 {
-    _score++;
-    char score[12];
-    sprintf(score, "%d", _score);
-    _scoreLabel->setString(score);
+    return create(_duration, -_magnitude);
 }
 
-void Score::reset()
+void Shake::startWithTarget(Node *target)
 {
-    _score = 0;
-    _scoreLabel->setString("0");
+    ActionInterval::startWithTarget(target);
+    _initial = target->getPosition();
 }
 
-int Score::getScore()
+void Shake::update(float time)
 {
-    return _score;
+    Vec2 offset(RandomHelper::random_real(-_magnitude.x, _magnitude.x),
+                RandomHelper::random_real(-_magnitude.y, _magnitude.y));
+    _target->setPosition(_initial + offset);
 }
 
-void Score::updateScore()
+void Shake::stop(void)
 {
-    int topScore = UserDefault::getInstance()->getIntegerForKey("topScore", -1);
-    if (topScore < _score) {
-        UserDefault::getInstance()->setIntegerForKey("topScore", _score);
-        UserDefault::getInstance()->flush();
+    _target->setPosition(_initial);
+    ActionInterval::stop();
+
+}
+
+bool Shake::initWithDuration(float duration, axmol::Vec2 magnitude)
+{
+    if (ActionInterval::initWithDuration(duration)) {
+        _magnitude = magnitude;
+        return true;
     }
+    return false;
 }
-
-int Score::getTopScore()
-{
-    return UserDefault::getInstance()->getIntegerForKey("topScore", 0);
-}
-
-//Score::Score() { }
-//Score::~Score() { }

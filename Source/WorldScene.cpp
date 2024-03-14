@@ -27,7 +27,7 @@ bool WorldScene::init()
         return false;
 
     //getPhysicsWorld()->setDebugDrawMask(0xffff);
-    getPhysicsWorld()->setGravity(Vect(0, -900));
+    getPhysicsWorld()->setGravity(ax::Vec2(0, -900));
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
