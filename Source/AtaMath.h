@@ -8,7 +8,7 @@
 
 class AtaMath {
 public :
-    float interpolate(float minValue, float maxValue, float interpolation);
+    static float interpolate(float minValue, float maxValue, float interpolation);
 
 };
 

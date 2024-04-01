@@ -7,7 +7,7 @@
 #include <iostream>
 
 
-float interpolate(float minValue, float maxValue, float interpolation) {
+float AtaMath::interpolate(float minValue, float maxValue, float interpolation) {
     // Ensure interpolation is between 0 and 1
     interpolation = std::max(0.0f, std::min(1.0f, interpolation));
 

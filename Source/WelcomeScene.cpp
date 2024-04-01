@@ -10,6 +10,7 @@ USING_NS_AX;
 
 #include "Bird.h"
 #include "WorldScene.h"
+#include "AtaMath.h"
 
 bool WelcomeScene::init()
 {
@@ -33,6 +34,8 @@ bool WelcomeScene::init()
         // add the background as a child to this layer
         world->addChild(background, 0);
 
+        auto boundingBox =background->getBoundingBox();
+
         //Add ground
         _ground[0] = Sprite::createWithSpriteFrameName("ground.png");
         _ground[1] = Sprite::createWithSpriteFrameName("ground.png");
@@ -42,20 +45,30 @@ bool WelcomeScene::init()
         _ground[0]->setAnchorPoint(Point::ZERO);
         _ground[1]->setAnchorPoint(Point::ZERO);
 
-        _ground[0]->setPosition(Point::ZERO);
-        _ground[1]->setPosition(Vec2(groundSize.width, 0));
+//        _ground[0]->setPosition(Point::ZERO);
+//        _ground[1]->setPosition(Vec2(groundSize.width, 0));
+        float minX = boundingBox.getMinX();
+        float maxX = boundingBox.getMaxX();
+
+        float minY = boundingBox.getMinY();
+        float maxY = boundingBox.getMaxY();
+
+        _ground[0]->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0), AtaMath::interpolate(minY,maxY,0)));
+        _ground[1]->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0)+groundSize.width, AtaMath::interpolate(minY,maxY,0)));
 
         world->addChild(_ground[0], 1);
         world->addChild(_ground[1], 1);
 
         auto title = Sprite::createWithSpriteFrameName("label_flappy_bird.png");
-        title->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*2.0/3 + origin.y));
+//        title->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*2.0/3 + origin.y));
+        title->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,0.75)));
 
-        addChild(title);
+        world->addChild(title);
 
         //Create play button
         auto play = ax::ui::Button::create("button_play_normal.png", "button_play_pressed.png", "", ax::ui::Widget::TextureResType::PLIST);
-        play->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/3 + origin.y));
+//        play->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/3 + origin.y));
+        play->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,.45)));
 
         play->addClickEventListener([](Ref* sender) {
             AudioEngine::play2d("sfx_swooshing.wav");
@@ -66,9 +79,10 @@ bool WelcomeScene::init()
         addChild(play);
 
         auto bird = Bird::create();
-        bird->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+//        bird->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+        bird->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,0.60)));
         bird->idle();
-        addChild(bird);
+        world->addChild(bird);
 
         //Schedule update to be called per frame
         scheduleUpdate();
