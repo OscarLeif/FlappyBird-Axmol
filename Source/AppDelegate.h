@@ -57,6 +57,8 @@ public:
     @brief  Called when the application reenters the foreground
     */
     void applicationWillEnterForeground() override;
+
+    void applicationScreenSizeChanged(int newWidth, int newHeight) override;
 };
 
 #endif  // _APP_DELEGATE_H_

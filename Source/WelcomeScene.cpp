@@ -16,6 +16,9 @@ bool WelcomeScene::init()
         if (!Scene::init())
             return false;
 
+        auto world = Node::create();
+        addChild(world);
+
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -25,9 +28,10 @@ bool WelcomeScene::init()
         //Add background
         auto background = Sprite::createWithSpriteFrameName("background_day.png");
         // position the background on the center of the screen
-        background->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+//        background->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+        background->setWorldPosition(Vec2::ZERO);
         // add the background as a child to this layer
-        addChild(background, 0);
+        world->addChild(background, 0);
 
         //Add ground
         _ground[0] = Sprite::createWithSpriteFrameName("ground.png");
@@ -41,8 +45,8 @@ bool WelcomeScene::init()
         _ground[0]->setPosition(Point::ZERO);
         _ground[1]->setPosition(Vec2(groundSize.width, 0));
 
-        addChild(_ground[0], 1);
-        addChild(_ground[1], 1);
+        world->addChild(_ground[0], 1);
+        world->addChild(_ground[1], 1);
 
         auto title = Sprite::createWithSpriteFrameName("label_flappy_bird.png");
         title->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*2.0/3 + origin.y));
@@ -81,4 +85,7 @@ void WelcomeScene::update(float delta)
         if (_ground[i]->getPositionX() < -groundWidth)
             _ground[i]->setPositionX(_ground[i]->getPositionX() + 2*groundWidth);
     }
+
+    auto camera = Camera::getDefaultCamera();
+    camera->setWorldPosition(Vec2::ZERO);
 }

@@ -75,8 +75,8 @@ bool AppDelegate::applicationDidFinishLaunching()
     director->setAnimationInterval(1.0f / 60);
 
     // Set the design resolution
-    glView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height,
-                                    ResolutionPolicy::SHOW_ALL);
+    //    glView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height,
+    //                                    ResolutionPolicy::SHOW_ALL);
 
     auto sharedFileUtils = FileUtils::getInstance();
     std::vector<std::string> searchPaths;
@@ -113,4 +113,28 @@ void AppDelegate::applicationWillEnterForeground()
 #if USE_AUDIO_ENGINE
     AudioEngine::resumeAll();
 #endif
+}
+
+void AppDelegate::applicationScreenSizeChanged(int newWidth, int newHeight)
+{
+    if (newWidth <= 0 || newHeight <= 0)
+    {
+        return;
+    }
+
+    auto director = Director::getInstance();
+    auto glView= director->getGLView();
+    if (glView)
+    {
+        auto size = glView->getFrameSize();
+        if (size.equals(Size(newWidth, newHeight)))
+            return;
+
+        glView->setFrameSize(newWidth, newHeight);
+
+        ResolutionPolicy resolutionPolicy = glView->getResolutionPolicy();
+        if (resolutionPolicy == ResolutionPolicy::UNKNOWN)
+            resolutionPolicy = ResolutionPolicy::SHOW_ALL;
+        glView->setDesignResolutionSize(newWidth, newHeight, resolutionPolicy);
+    }
 }
