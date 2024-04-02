@@ -4,6 +4,7 @@
 #include "PhysicsHelper.h"
 #include "Shake.h"
 #include "audio/AudioEngine.h"
+#include "AtaMath.h"
 
 USING_NS_AX;
 //using namespace CocosDenshion;
@@ -25,8 +26,7 @@ bool WorldScene::init()
 {
     if (!Scene::initWithPhysics())
         return false;
-
-    //getPhysicsWorld()->setDebugDrawMask(0xffff);
+    getPhysicsWorld()->setDebugDrawMask(0xffff);
     getPhysicsWorld()->setGravity(ax::Vec2(0, -900));
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -35,9 +35,13 @@ bool WorldScene::init()
     //Add background
     auto background = Sprite::createWithSpriteFrameName("background_day.png");
     // position the background on the center of the screen
-    background->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+//    background->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+    background->setPosition(Vec2::ZERO);
+    background->setTag(111);
     // add the background as a child to this layer
     addChild(background, 0);
+
+    this->_background = background;
 
     /*
      * A node hold game world other than background
@@ -53,18 +57,31 @@ bool WorldScene::init()
     _ground[0]->setAnchorPoint(Point::ZERO);
     _ground[1]->setAnchorPoint(Point::ZERO);
 
-    _ground[0]->setPosition(Point::ZERO);
-    _ground[1]->setPosition(Vec2(_ground[0]->getContentSize().width, 0));
+    auto boundingBox = background->getBoundingBox();
+    this->_backgroundBoundingBox = boundingBox;
+
+    float minX = boundingBox.getMinX();
+    float maxX = boundingBox.getMaxX();
+    float minY = boundingBox.getMinY();
+    float maxY = boundingBox.getMaxY();
+
+//    _ground[0]->setPosition(Point::ZERO);
+//    _ground[1]->setPosition(Vec2(_ground[0]->getContentSize().width, 0));
+
+    _ground[0]->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0), AtaMath::interpolate(minY,maxY,0)));
+    _ground[1]->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0)+ _ground[0]->getContentSize().width,  AtaMath::interpolate(minY,maxY,0)));
 
     _gameNode->addChild(_ground[0], 1);
     _gameNode->addChild(_ground[1], 1);
 
     _readyLabel = Sprite::createWithSpriteFrameName("label_get_ready.png");
-    _readyLabel->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*3.0f/4 + origin.y));
+//    _readyLabel->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*3.0f/4 + origin.y));
+    _readyLabel->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,0.75)));
     _gameNode->addChild(_readyLabel);
 
     _instruction = Sprite::createWithSpriteFrameName("instructions.png");
-    _instruction->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+//    _instruction->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+    _instruction->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,0.65)));
     _gameNode->addChild(_instruction);
 
     addPipes();
@@ -83,11 +100,15 @@ bool WorldScene::init()
     auto body = createBody(shape, false, false, GROUND_BIT, BIRD_BIT, BIRD_BIT);
 
     node->setPhysicsBody(body);
-    node->setPosition(Vec2(visibleSize.width/2, groundHeight/2));
+//    node->setPosition(Vec2(visibleSize.width/2, groundHeight/2));
+    node->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0), AtaMath::interpolate(minY,maxY,0.1)));
     _gameNode->addChild(node);
 
     //Schedule update to be called per frame
     scheduleUpdate();
+
+    // Schedule a custom update function with a specific interval
+    this->schedule(AX_SCHEDULE_SELECTOR(WorldScene::update2));  // Calls customUpdate every 1 second
 
     _state = GameState::INIT;
 
@@ -105,6 +126,8 @@ bool WorldScene::init()
     });
     getEventDispatcher()->addEventListenerWithSceneGraphPriority(eventListener, this);
 
+
+
     return true;
 }
 
@@ -115,7 +138,7 @@ void WorldScene::addPipes()
 
     for (int i=0; i<PIPE_COUNT; i++) {
         _pipes[i] = Pipes::create();
-        _pipes[i]->setPosition(Vec2(x, getRandomPipeY()));
+        _pipes[i]->setWorldPosition(Vec2(x, getRandomPipeY()));
 
         /*
          * Tag to identify the pipe so we can disable it in physics whenever needed.
@@ -136,7 +159,14 @@ void WorldScene::addBird()
 
     auto shape = PhysicsShapeCircle::create(BIRD_RADIUS);
     _bird->setPhysicsBody(createBody(shape, true, false, BIRD_BIT, GROUND_BIT | PIPE_BIT | COIN_BIT, GROUND_BIT));
-    _bird->setPosition(Vec2(visibleSize.width/2 + origin.x - 50, visibleSize.height/2 + origin.y));
+//    _bird->setPosition(Vec2(visibleSize.width/2 + origin.x - 50, visibleSize.height/2 + origin.y));
+
+    float minX = _backgroundBoundingBox.getMinX();
+    float maxX = _backgroundBoundingBox.getMaxX();
+    float minY = _backgroundBoundingBox.getMinX();
+    float maxY = _backgroundBoundingBox.getMaxY();
+
+    _bird->setWorldPosition(Vec2(AtaMath::interpolate(minX,maxX,0.40),AtaMath::interpolate(minY,maxY,0.5) ));
     _bird->idle();
 
     _gameNode->addChild(_bird);
@@ -144,9 +174,19 @@ void WorldScene::addBird()
 
 int WorldScene::getRandomPipeY()
 {
+    ///OK This one is hard
     auto visibleSize = Director::getInstance()->getVisibleSize();
-    int startY = _ground[0]->getContentSize().height + PIPE_VERTICAL_GAP/2.0f + PIPE_BOTTOM_MARGIN;
-    int endY = visibleSize.height - PIPE_VERTICAL_GAP/2.0f - PIPE_TOP_MARGIN;
+    int groundHeight = _ground[0]->getContentSize().height;
+
+//    int startY = _backgroundBoundingBox->getMinY()+ groundHeight + PIPE_VERTICAL_GAP/2.0f + PIPE_BOTTOM_MARGIN;
+//    int endY = visibleSize.height - PIPE_VERTICAL_GAP/2.0f - PIPE_TOP_MARGIN;
+//    int endY = _backgroundBoundingBox->getMaxY() - PIPE_VERTICAL_GAP/2.0f - PIPE_TOP_MARGIN;
+
+    int minY = _backgroundBoundingBox.getMinY();
+    int maxY = _backgroundBoundingBox.getMaxY();
+
+    int startY = AtaMath::interpolate(minY,maxY,0.25);
+    int endY = AtaMath::interpolate(minY,maxY,0.75);
 
     return ax::RandomHelper::random_int(startY, endY);
 }
@@ -164,6 +204,7 @@ bool WorldScene::onTouchBegan(Touch* touch, Event* event)
             _score->reset();
         case GameState::RUNNING:
             //SimpleAudioEngine::getInstance()->playEffect("sfx_wing.wav");//TODO Upgrade the Audio
+            AudioEngine::play2d("sfx_wing.wav");
             _bird->fly();
 
             /*
@@ -257,15 +298,31 @@ bool WorldScene::onPhysicsContactBegin(const PhysicsContact &contact)
     return true;
 }
 
+void WorldScene::update2(float dt)
+{
+    auto camera = Camera::getDefaultCamera();
+    camera->setWorldPosition(Vec2::ZERO);
+
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    float boundingBoxHeight = _backgroundBoundingBox.size.height;
+
+    bool isLandscape =  (visibleSize.width/visibleSize.height)>1;
+    // Calculate the desired zoom factor
+    float desiredHeight = isLandscape? visibleSize.height * 0.5 : visibleSize.width*0.35;
+    float zoomFactor = desiredHeight / boundingBoxHeight;
+
+    camera->setZoom(zoomFactor);
+}
+
 void WorldScene::update(float dt)
 {
-
     if (_state == GameState::OVER) {
         if (_bird->getRotation() > 30) {
             _bird->setRotation(30);
         }
         onGameOver();
         unscheduleUpdate();
+
         return;
     }
 
@@ -276,9 +333,10 @@ void WorldScene::update(float dt)
     float groundWidth = _ground[0]->getContentSize().width;
     for (int i=0; i<2; i++) {
         _ground[i]->setPositionX(_ground[i]->getPositionX() - 2.0f);
-
         if (_ground[i]->getPositionX() < -groundWidth)
-            _ground[i]->setPositionX(_ground[i]->getPositionX() + 2*groundWidth);
+        {
+            _ground[i]->setPositionX(_ground[i]->getPositionX() + 2 * groundWidth);
+        }
     }
 
     if (_state != GameState::RUNNING)
@@ -326,7 +384,14 @@ void WorldScene::restartGame()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     int x = visibleSize.width + PIPE_HORIZONTAL_GAP;
 
-    _bird->setPosition(Vec2(visibleSize.width/2 + origin.x - 50, visibleSize.height/2 + origin.y));
+    float minX = _backgroundBoundingBox.getMinX();
+    float maxX = _backgroundBoundingBox.getMaxX();
+    float minY = _backgroundBoundingBox.getMinX();
+    float maxY = _backgroundBoundingBox.getMaxY();
+
+    _bird->setWorldPosition(Vec2(AtaMath::interpolate(minX,maxX,0.40),AtaMath::interpolate(minY,maxY,0.5) ));
+//    _bird->setPosition(Vec2(visibleSize.width/2 + origin.x - 50, visibleSize.height/2 + origin.y));
+
     _bird->getPhysicsBody()->setGravityEnable(false);
     _bird->getPhysicsBody()->setVelocity(Vec2::ZERO);
     _bird->setRotation(0);

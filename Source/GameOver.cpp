@@ -4,16 +4,18 @@
 
 #include "GameOver.h"
 #include "audio/AudioEngine.h"
+#include "AtaMath.h"
 
 using namespace axmol::ui;
 //using namespace CocosDenshion;
+
 
 GameOver* GameOver::create(int score)
 {
     GameOver* gameOver = new (std::nothrow) GameOver();
     if (gameOver && gameOver->init(score))
     {
-        gameOver->autorelease();
+        gameOver->autorelease();        
         return gameOver;
     }
     AX_SAFE_DELETE(gameOver);
@@ -31,19 +33,47 @@ bool GameOver::init(int score)
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+    //game over label image
+    auto gameOverLabel = Sprite::createWithSpriteFrameName("label_game_over.png");
+    gameOverLabel->setOpacity(0);
 
-    auto gameOver = Sprite::createWithSpriteFrameName("label_game_over.png");
-    gameOver->setOpacity(0);
-    gameOver->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*5.0/6 + origin.y));
+    //missing reference
+    auto scene= Director::getInstance()->getRunningScene();
+    auto worldScene = scene->getChildByTag(111);
+
+    Rect bounds = Rect();
+
+    if (worldScene)
+    {
+        // WorldScene found, you can use it here
+        auto a = dynamic_cast<Sprite*>(worldScene);
+        bounds = a->getBoundingBox();
+    }
+    else
+    {
+        // WorldScene not found
+    }
+
+    auto b = bounds;
+
+    float minX = b.getMinX();
+    float maxX = b.getMaxX();
+    float minY = b.getMinY();
+    float maxY = b.getMaxY();
+
+//    gameOverLabel->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*5.0/6 + origin.y));
+    float a = AtaMath::interpolate(minY, maxY, 0.75);
+    gameOverLabel->setWorldPosition(Vec2(AtaMath::interpolate(minX, maxX, 0.5), AtaMath::interpolate(minY, maxY, 0.80)));
 
     FadeIn* fadeIn = FadeIn::create(0.3f);
-    gameOver->runAction(fadeIn);
+    gameOverLabel->runAction(fadeIn);
 
-    addChild(gameOver, 2);
+    addChild(gameOverLabel, 2);
 
     _playButton = Button::create("button_play_normal.png", "button_play_pressed.png", "", Widget::TextureResType::PLIST);
     _playButton->setVisible(false);
-    _playButton->setPosition(Vec2(visibleSize.width/2 - _playButton->getContentSize().width/2 - 8 + origin.x, visibleSize.height/3 + origin.y));
+//    _playButton->setPosition(Vec2(visibleSize.width/2 - _playButton->getContentSize().width/2 - 8 + origin.x, visibleSize.height/3 + origin.y));
+    _playButton->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.25), AtaMath::interpolate(minY,maxY,0.35)));
     _playButton->addClickEventListener([=](Ref* sender) {
         //SimpleAudioEngine::getInstance()->playEffect("sfx_swooshing.wav");
         AudioEngine::play2d("sfx_swooshing.wav");
@@ -55,12 +85,16 @@ bool GameOver::init(int score)
 
     _scoreButton = Button::create("button_score_normal.png", "button_score_pressed.png", "", Widget::TextureResType::PLIST);
     _scoreButton->setVisible(false);
-    _scoreButton->setPosition(Vec2(visibleSize.width/2 + _playButton->getContentSize().width/2 + 8 + origin.x, visibleSize.height/3 + origin.y));
+//    _scoreButton->setPosition(Vec2(visibleSize.width/2 + _playButton->getContentSize().width/2 + 8 + origin.x, visibleSize.height/3 + origin.y));
+    _scoreButton->setPosition(Vec2(AtaMath::interpolate(minX, maxX, 0.75), AtaMath::interpolate(minY, maxY, 0.35)));
+
     addChild(_scoreButton, 2);
 
     auto scorePanel = Sprite::createWithSpriteFrameName("panel_score.png");
-    Vec2 endPos(visibleSize.width/2 + origin.x, visibleSize.height*3.5/6 + origin.y);
-    Vec2 startPos(visibleSize.width/2 + origin.x, -scorePanel->getContentSize().height/2 + origin.y);
+    //Vec2 endPos(visibleSize.width/2 + origin.x, visibleSize.height*3.5/6 + origin.y);
+    //Vec2 startPos(visibleSize.width/2 + origin.x, -scorePanel->getContentSize().height/2 + origin.y);
+    Vec2 endPos(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,0.60));
+    Vec2 startPos(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,0.65) - visibleSize.y);
     auto moveTo = MoveTo::create(0.5f, endPos);
     auto actionDone = CallFunc::create(AX_CALLBACK_0(GameOver::onAnimationFinished, this));
     auto seq = Sequence::createWithTwoActions(EaseExponentialOut::create(moveTo), actionDone);
@@ -117,7 +151,6 @@ bool GameOver::init(int score)
         _sparkle->runAction(shine);
         scorePanel->addChild(_sparkle, 2);
     }
-
     return true;
 }
 

@@ -34,7 +34,7 @@ bool WelcomeScene::init()
         // add the background as a child to this layer
         world->addChild(background, 0);
 
-        auto boundingBox =background->getBoundingBox();
+        boundingBox = background->getBoundingBox();
 
         //Add ground
         _ground[0] = Sprite::createWithSpriteFrameName("ground.png");
@@ -87,6 +87,14 @@ bool WelcomeScene::init()
         //Schedule update to be called per frame
         scheduleUpdate();
 
+        // Enable touch events
+        auto listener = EventListenerTouchOneByOne::create();
+        listener->setSwallowTouches(true);
+
+        listener->onTouchBegan = AX_CALLBACK_2(WelcomeScene::onTouchBegan, this);
+        listener->onTouchEnded = AX_CALLBACK_2(WelcomeScene::onTouchEnded, this);
+        _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
         return true;
 }
 
@@ -102,4 +110,56 @@ void WelcomeScene::update(float delta)
 
     auto camera = Camera::getDefaultCamera();
     camera->setWorldPosition(Vec2::ZERO);
+
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    float boundingBoxHeight = boundingBox.size.height;
+
+    bool isLandscape =  (visibleSize.width/visibleSize.height)>1;
+    // Calculate the desired zoom factor
+    float desiredHeight = isLandscape? visibleSize.height * 0.5 : visibleSize.width*0.35;
+    float zoomFactor = desiredHeight / boundingBoxHeight;
+
+    camera->setZoom(zoomFactor);
 }
+
+bool WelcomeScene::onTouchBegan(Touch* touch, Event* event) {
+    if (touchLocked) {
+        // Touch is already locked, ignore new touches
+        return false;
+    }
+
+    // Lock the touch
+    touchLocked = true;
+
+    // Get the touch location
+    Vec2 touchLocation = touch->getLocation();
+
+    // Get the screen size
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+
+    auto Camera = ax::Camera::getDefaultCamera();
+    float increment = 0.1f;
+
+    // Check if the touch occurred on the left side of the screen
+    if (touchLocation.x < visibleSize.width / 2) {
+        // Touch on the left side
+        AXLOG("Touch on the left side of the screen");
+        float newZoom = Camera->getZoom() - increment;
+        Camera->setZoom(newZoom);
+    }
+        // Check if the touch occurred on the right side of the screen
+    else {
+        // Touch on the right side
+        AXLOG("Touch on the right side of the screen");
+        float newZoom = Camera->getZoom() + increment;
+        Camera->setZoom(newZoom);
+    }
+
+    return true;
+}
+
+void WelcomeScene::onTouchEnded(Touch* touch, Event* event) {
+    // Unlock the touch
+    touchLocked = false;
+}
+

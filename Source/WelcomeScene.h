@@ -13,11 +13,16 @@ public:
     bool init() override;
     void update(float delta) override;
 
+    virtual bool onTouchBegan(ax::Touch* touch, ax::Event* event);
+    virtual void onTouchEnded(ax::Touch*, ax::Event*);
+
     //touch interface
 
     //keyboard interface
 private:
     ax::Sprite* _ground[2];
+    ax::Rect boundingBox;
+    bool touchLocked = false; // Flag to indicate if touch is locked
 };
 
 

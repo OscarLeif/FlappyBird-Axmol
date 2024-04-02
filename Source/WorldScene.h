@@ -30,7 +30,9 @@ public:
     static ax::Scene* create();
     virtual bool init();
     virtual void update(float dt);
-
+    void update2(float dt);
+    static WorldScene Get;
+    Rect _backgroundBoundingBox;
 private:
     void addPipes();
     void addBird();
@@ -45,6 +47,9 @@ private:
     Sprite* _ground[2];
     Sprite* _instruction;
     Sprite* _readyLabel;
+    Sprite* _background;
+
+
     Score* _score;
     Bird* _bird;
     Pipes* _pipes[PIPE_COUNT];

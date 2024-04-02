@@ -58,7 +58,9 @@ public:
     */
     void applicationWillEnterForeground() override;
 
-    void applicationScreenSizeChanged(int newWidth, int newHeight) override;
+    #if (AX_TARGET_PLATFORM == AX_PLATFORM_ANDROID)
+        void applicationScreenSizeChanged(int newWidth, int newHeight) override;
+    #endif
 };
 
 #endif  // _APP_DELEGATE_H_

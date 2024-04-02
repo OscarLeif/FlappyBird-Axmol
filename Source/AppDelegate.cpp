@@ -61,9 +61,9 @@ bool AppDelegate::applicationDidFinishLaunching()
 #if (AX_TARGET_PLATFORM == AX_PLATFORM_WIN32) || (AX_TARGET_PLATFORM == AX_PLATFORM_MAC) || \
     (AX_TARGET_PLATFORM == AX_PLATFORM_LINUX)
         glView = GLViewImpl::createWithRect(
-            "FlappyBird", ax::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
-#else
-        glView = GLViewImpl::create("FlappyBird");
+            "FlappyBird", ax::Rect(0, 0, designResolutionSize.width, designResolutionSize.height), 1.0F, true);
+#else        
+        glView = GLViewImpl::create("FlappyBird"); // Android means use fullscreen resolution
 #endif
         director->setGLView(glView);
     }
@@ -77,6 +77,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     // Set the design resolution
     //    glView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height,
     //                                    ResolutionPolicy::SHOW_ALL);
+    
 
     auto sharedFileUtils = FileUtils::getInstance();
     std::vector<std::string> searchPaths;
@@ -115,6 +116,7 @@ void AppDelegate::applicationWillEnterForeground()
 #endif
 }
 
+#if (AX_TARGET_PLATFORM == AX_PLATFORM_ANDROID)
 void AppDelegate::applicationScreenSizeChanged(int newWidth, int newHeight)
 {
     if (newWidth <= 0 || newHeight <= 0)
@@ -138,3 +140,4 @@ void AppDelegate::applicationScreenSizeChanged(int newWidth, int newHeight)
         glView->setDesignResolutionSize(newWidth, newHeight, resolutionPolicy);
     }
 }
+#endif
