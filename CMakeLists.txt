@@ -29,6 +29,13 @@ set(APP_NAME FlappyBird)
 
 project(${APP_NAME})
 
+option(AX_ENABLE_3D "Build 3D support" ON)
+option(AX_ENABLE_PHYSICS "Build Physics support" ON)
+option(AX_ENABLE_3D_PHYSICS "Build 3D Physics support" ON)
+option(AX_ENABLE_NAVMESH "Build NavMesh support" ON)
+option(AX_ENABLE_MEDIA "Build media support" ON)
+option(AX_ENABLE_AUDIO "Build audio support" ON)
+
 if(NOT DEFINED BUILD_ENGINE_DONE) # to test FlappyBird into root project
     if(XCODE)
         set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
