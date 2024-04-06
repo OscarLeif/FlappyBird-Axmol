@@ -5,12 +5,14 @@
 #include "WelcomeScene.h"
 #include "ui/axmol-ui.h"
 #include "audio/AudioEngine.h"
+#include "BetterButton.h"
 
 USING_NS_AX;
 
 #include "Bird.h"
 #include "WorldScene.h"
 #include "AtaMath.h"
+#include "UIManager.h"
 
 bool WelcomeScene::init()
 {
@@ -66,7 +68,8 @@ bool WelcomeScene::init()
         world->addChild(title);
 
         //Create play button
-        auto play = ax::ui::Button::create("button_play_normal.png", "button_play_pressed.png", "", ax::ui::Widget::TextureResType::PLIST);
+        //auto play = ax::ui::Button::create("button_play_normal.png", "button_play_pressed.png", "", ax::ui::Widget::TextureResType::PLIST);
+        auto play = BetterButton::create("button_play_normal.png", "button_play_pressed.png");
 //        play->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/3 + origin.y));
         play->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,.45)));
 
@@ -76,13 +79,27 @@ bool WelcomeScene::init()
             Director::getInstance()->replaceScene(transition);
         });
 
+        auto exit = BetterButton::create("button_play_normal.png", "button_play_pressed.png");
+        exit->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,.35)));
+
+        play->downButton=exit;
+        exit->upButton=play;
+
+
         addChild(play);
+        addChild(exit);
+
+        UIManager::getInstance()->setFocusedButton(play);
+        UIManager::getInstance()->initKeyboardListener();
 
         auto bird = Bird::create();
 //        bird->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
         bird->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,0.60)));
         bird->idle();
         world->addChild(bird);
+
+        //The listener should be disable on play mode.
+        //UIManager::getInstance()->initKeyboardListener();
 
         //Schedule update to be called per frame
         scheduleUpdate();

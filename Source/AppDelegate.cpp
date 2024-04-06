@@ -60,8 +60,8 @@ bool AppDelegate::applicationDidFinishLaunching()
     {
 #if (AX_TARGET_PLATFORM == AX_PLATFORM_WIN32) || (AX_TARGET_PLATFORM == AX_PLATFORM_MAC) || \
     (AX_TARGET_PLATFORM == AX_PLATFORM_LINUX)
-        glView = GLViewImpl::createWithRect(
-            "FlappyBird", ax::Rect(0, 0, designResolutionSize.width, designResolutionSize.height), 1.0F, true);
+        //glView = GLViewImpl::createWithRect("FlappyBird", ax::Rect(0, 0, designResolutionSize.width, designResolutionSize.height), 1.0F, true);
+        glView = GLViewImpl::create("FlappyBird", true);  // Android means use fullscreen resolution
 #else        
         glView = GLViewImpl::create("FlappyBird"); // Android means use fullscreen resolution
 #endif
