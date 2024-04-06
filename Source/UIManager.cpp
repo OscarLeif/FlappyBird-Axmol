@@ -4,26 +4,46 @@
 
 #include "UIManager.h"
 
-UIManager* UIManager::getInstance() {
-    static UIManager* instance;
-    return instance;
+static UIManager* s_sharedUIManager = nullptr;
+
+UIManager* UIManager::getInstance()
+{
+    if (!s_sharedUIManager)
+    {
+        s_sharedUIManager = new UIManager();
+        //initialize stuff later
+    }
+    return s_sharedUIManager;
 }
+
+UIManager::UIManager() : focusedButton(nullptr), keyboardListener(nullptr) {}
 
 void UIManager::initKeyboardListener()
 {
-    auto keyboardListener1 = EventListenerKeyboard::create();
-    keyboardListener1->onKeyPressed = AX_CALLBACK_2(UIManager::onKeyPressed, this);
-    keyboardListener1->onKeyReleased= AX_CALLBACK_2(UIManager::onKeyReleased, this);
+    auto keyboardListener1           = EventListenerKeyboard::create();
+    keyboardListener1->onKeyPressed  = AX_CALLBACK_2(UIManager::onKeyPressed, this);
+    keyboardListener1->onKeyReleased = AX_CALLBACK_2(UIManager::onKeyReleased, this);
 
     Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(keyboardListener1, 1);
 }
 
 void UIManager::setFocusedButton(BetterButton* button)
 {
-    if(button != nullptr)
+    if (!button)
     {
         focusedButton = button;
         AXLOG("The value is: %s", button->getName());
+
+        // Update reticle position to match the selected button
+        reticle->setPosition(button->getPosition());
+
+        // Set reticle scale to fit the selected button
+        Size buttonSize = button->getContentSize();
+        reticle->setScale(buttonSize.width / reticle->getContentSize().width,
+                          buttonSize.height / reticle->getContentSize().height);
+
+        // Show the reticle
+        reticle->setVisible(true);
     }
     else
     {
@@ -31,8 +51,12 @@ void UIManager::setFocusedButton(BetterButton* button)
     }
 }
 
-BetterButton* UIManager::getFocusedButton() const {
-    return focusedButton;
+BetterButton* UIManager::getFocusedButton() const
+{
+    if (!focusedButton)
+        return nullptr;
+    else
+        return focusedButton;
 }
 
 void UIManager::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
@@ -105,10 +129,12 @@ void UIManager::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
     case ax::EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
         break;
     case ax::EventKeyboard::KeyCode::KEY_UP_ARROW:
-        setFocusedButton(this->focusedButton->upButton);
+        if (getFocusedButton() != nullptr)
+            setFocusedButton(this->focusedButton->upButton);
         break;
     case ax::EventKeyboard::KeyCode::KEY_DOWN_ARROW:
-        setFocusedButton(this->focusedButton->downButton);
+        if (getFocusedButton() != nullptr)
+            setFocusedButton(this->focusedButton->downButton);
         break;
     case ax::EventKeyboard::KeyCode::KEY_NUM_LOCK:
         break;
@@ -379,7 +405,8 @@ void UIManager::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
     case ax::EventKeyboard::KeyCode::KEY_DPAD_CENTER:
         break;
     case ax::EventKeyboard::KeyCode::KEY_ENTER:
-        this->focusedButton->
+        if (getFocusedButton() != nullptr)
+            this->focusedButton->TriggerEventClick();
         break;
     case ax::EventKeyboard::KeyCode::KEY_PLAY:
         break;

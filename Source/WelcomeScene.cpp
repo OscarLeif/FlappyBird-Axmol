@@ -89,8 +89,7 @@ bool WelcomeScene::init()
         addChild(play);
         addChild(exit);
 
-        UIManager::getInstance()->setFocusedButton(play);
-        UIManager::getInstance()->initKeyboardListener();
+        
 
         auto bird = Bird::create();
 //        bird->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
@@ -111,6 +110,9 @@ bool WelcomeScene::init()
         listener->onTouchBegan = AX_CALLBACK_2(WelcomeScene::onTouchBegan, this);
         listener->onTouchEnded = AX_CALLBACK_2(WelcomeScene::onTouchEnded, this);
         _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
+        UIManager::getInstance()->initKeyboardListener();
+        UIManager::getInstance()->setFocusedButton(play);
 
         return true;
 }

@@ -29,8 +29,8 @@ bool BetterButton::init(std::string normalImage, const std::string selectedImage
 
 void BetterButton::TriggerEventClick()
 {
-    if (this->_clickEventListener)
+    if (_clickEventListener)
     {
-        
+        _clickEventListener(this);
     }
 }

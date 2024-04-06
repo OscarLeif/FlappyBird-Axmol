@@ -13,16 +13,16 @@ USING_NS_AX;
 class UIManager {
 public:
     static UIManager* getInstance();
+    UIManager();
     void setFocusedButton(BetterButton* button);
     BetterButton* getFocusedButton() const;
     void initKeyboardListener();
-
 private:
-    UIManager();
     BetterButton* focusedButton;
-    EventListenerKeyboard* keyboardListener;
+    EventListenerKeyboard* keyboardListener;    
     void onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event);
     void onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event);
+    Sprite* reticle;  // Reticle sprite
 };
 
 
