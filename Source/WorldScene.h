@@ -11,6 +11,7 @@
 #include "Pipes.h"
 #include "Bird.h"
 #include "Score.h"
+#include "UINavMenu.h"
 
 USING_NS_AX;
 
@@ -33,6 +34,7 @@ public:
     void update2(float dt);
     static WorldScene Get;
     Rect _backgroundBoundingBox;
+    UINavMenu* UINavMenu;
 private:
     void addPipes();
     void addBird();

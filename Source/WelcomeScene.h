@@ -6,6 +6,7 @@
 #define FLAPPYBIRD_WELCOMESCENE_H
 
 #include "axmol.h"
+#include "UINavMenu.h"
 
 class WelcomeScene :public ax::Scene
 {
@@ -20,6 +21,7 @@ public:
 
     //keyboard interface
 private:
+    UINavMenu* navMenu;
     ax::Sprite* _ground[2];
     ax::Rect boundingBox;
     bool touchLocked = false; // Flag to indicate if touch is locked

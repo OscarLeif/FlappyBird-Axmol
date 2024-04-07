@@ -8,15 +8,19 @@
 
 #include "axmol.h"
 #include "ui/UIButton.h."
-//#include "ui/CocosGUI.h"
 
 USING_NS_AX;
 using namespace ax::ui;
 
 class BetterButton : public Button {
 public:
-    static BetterButton* create(const std::string normalImage, const std::string selectedImage);
-    virtual bool init(const std::string normalImage, const std::string selectedImage);
+    BetterButton();
+    static BetterButton* create(const std::string normalImage,
+                                const std::string selectedImage,
+                                ax::ui::Widget::TextureResType);
+    virtual bool init(const std::string normalImage,
+                      const std::string selectedImage,
+                      ax::ui::Widget::TextureResType);
 
     BetterButton* upButton;
     BetterButton* downButton;

@@ -4,11 +4,19 @@
 
 #include "BetterButton.h"
 
+BetterButton::BetterButton() : leftButton(nullptr), righButton(nullptr), upButton(nullptr), downButton(nullptr) {}
 
-BetterButton* BetterButton::create(std::string normalImage, std::string selectedImage)
+BetterButton* BetterButton::create(std::string normalImage,
+                                   std::string selectedImage,
+                                   ax::ui::Widget::TextureResType textType)
 {
     auto button = new (std::nothrow) BetterButton();
-    if (button && button->init(normalImage, selectedImage)) {
+    if (button && button->init(normalImage, selectedImage, textType))
+    {
+        button->leftButton = nullptr;
+        button->righButton = nullptr;
+        button->upButton   = nullptr;
+        button->downButton = nullptr;
         button->autorelease();
         return button;
     }
@@ -16,14 +24,14 @@ BetterButton* BetterButton::create(std::string normalImage, std::string selected
     return nullptr;
 }
 
-bool BetterButton::init(std::string normalImage, const std::string selectedImage) {
-    if (!Button::init(normalImage, selectedImage, "", ax::ui::Widget::TextureResType::PLIST)) {
+bool BetterButton::init(std::string normalImage,
+                        const std::string selectedImage,
+                        ax::ui::Widget::TextureResType textType)
+{
+    if (!Button::init(normalImage, selectedImage, "", textType))
+    {
         return false;
     }
-
-    // Additional initialization specific to BetterButton
-    int sum = 1+1;
-
     return true;
 }
 

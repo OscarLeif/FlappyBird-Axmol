@@ -12,7 +12,7 @@ USING_NS_AX;
 #include "Bird.h"
 #include "WorldScene.h"
 #include "AtaMath.h"
-#include "UIManager.h"
+#include "UINavMenu.h"
 
 bool WelcomeScene::init()
 {
@@ -67,10 +67,14 @@ bool WelcomeScene::init()
 
         world->addChild(title);
 
+        navMenu = UINavMenu::create();
+
         //Create play button
         //auto play = ax::ui::Button::create("button_play_normal.png", "button_play_pressed.png", "", ax::ui::Widget::TextureResType::PLIST);
-        auto play = BetterButton::create("button_play_normal.png", "button_play_pressed.png");
-//        play->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/3 + origin.y));
+        auto play = BetterButton::create("button_play_normal.png", "button_play_pressed.png", Widget::TextureResType::PLIST);
+        play->setName("PlayBt");
+            //        play->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/3 + origin.y));
+            play->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
         play->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,.45)));
 
         play->addClickEventListener([](Ref* sender) {
@@ -79,17 +83,15 @@ bool WelcomeScene::init()
             Director::getInstance()->replaceScene(transition);
         });
 
-        auto exit = BetterButton::create("button_play_normal.png", "button_play_pressed.png");
+        auto exit = BetterButton::create("indicator.png", "", Widget::TextureResType::LOCAL);
+        exit->setName("exit");
         exit->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,.35)));
 
         play->downButton=exit;
         exit->upButton=play;
 
-
         addChild(play);
         addChild(exit);
-
-        
 
         auto bird = Bird::create();
 //        bird->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
@@ -98,7 +100,7 @@ bool WelcomeScene::init()
         world->addChild(bird);
 
         //The listener should be disable on play mode.
-        //UIManager::getInstance()->initKeyboardListener();
+        //UINavMenu::getInstance()->initKeyboardListener();
 
         //Schedule update to be called per frame
         scheduleUpdate();
@@ -111,8 +113,12 @@ bool WelcomeScene::init()
         listener->onTouchEnded = AX_CALLBACK_2(WelcomeScene::onTouchEnded, this);
         _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
-        UIManager::getInstance()->initKeyboardListener();
-        UIManager::getInstance()->setFocusedButton(play);
+        //UINavMenu::getInstance()->initKeyboardListener();
+        //UINavMenu::getInstance()->setFocusedButton(play);
+        addChild(navMenu);
+
+        navMenu->initKeyboardListener();
+        navMenu->setSelectedButton(play);
 
         return true;
 }
