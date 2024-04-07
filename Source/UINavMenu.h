@@ -14,6 +14,7 @@ class UINavMenu : public Node
 {
 public:
     UINavMenu();
+    ~UINavMenu();
     static UINavMenu* create();
     bool init() override;
     void update(float delta) override;

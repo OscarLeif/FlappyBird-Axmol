@@ -7,10 +7,20 @@
 
 UINavMenu::UINavMenu() : selectedButton(nullptr), keyboardListener(nullptr), indicator(nullptr), currentScale(0) {}
 
+UINavMenu::~UINavMenu()
+{
+    indicator      = nullptr;
+    selectedButton = nullptr;
+    currentScale   = 1;
+    scalingUp      = true;
+    Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(keyboardListener, 1);
+    keyboardListener = nullptr;
+}
+
 UINavMenu* UINavMenu::create()
 {
     auto navMenu = new UINavMenu();
-    if(navMenu && navMenu->Node::init() && navMenu->init())
+    if (navMenu && navMenu->Node::init() && navMenu->init())
     {
         return navMenu;
     }
@@ -20,24 +30,24 @@ UINavMenu* UINavMenu::create()
 
 bool UINavMenu::init()
 {
-    if(!Node::init())
+    if (!Node::init())
     {
         return false;
     }
     indicator = Scale9Sprite::create("indicator.png");
     indicator->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
-    //indicator->setCenterRectNormalized(Rect(0.5f,0.5f,0.2f,0.2f));
-    this->addChild(indicator,100);
+    // indicator->setCenterRectNormalized(Rect(0.5f,0.5f,0.2f,0.2f));
+    this->addChild(indicator, 100);
     this->scheduleUpdate();
     return true;
 }
 
 void UINavMenu::initKeyboardListener()
 {
-    auto keyboardListener1           = EventListenerKeyboard::create();
-    keyboardListener1->onKeyPressed  = AX_CALLBACK_2(UINavMenu::onKeyPressed, this);
-    keyboardListener1->onKeyReleased = AX_CALLBACK_2(UINavMenu::onKeyReleased, this);
-    Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(keyboardListener1, 1);
+    keyboardListener= EventListenerKeyboard::create();
+    keyboardListener->onKeyPressed  = AX_CALLBACK_2(UINavMenu::onKeyPressed, this);
+    keyboardListener->onKeyReleased = AX_CALLBACK_2(UINavMenu::onKeyReleased, this);
+    Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(keyboardListener, 1);
 }
 
 void UINavMenu::setSelectedButton(BetterButton* iSelectButton)
@@ -48,18 +58,22 @@ void UINavMenu::setSelectedButton(BetterButton* iSelectButton)
         AXLOG("The value is: %s \n", iSelectButton->getName());
         // Set reticle scale to fit the selected button
         Size buttonSize = iSelectButton->getContentSize();
-//        indicator->setScale(buttonSize.width / indicator->getContentSize().width,
-//                          buttonSize.height / indicator->getContentSize().height);
+        //        indicator->setScale(buttonSize.width / indicator->getContentSize().width,
+        //                          buttonSize.height / indicator->getContentSize().height);
         auto buttonBounds = iSelectButton->getBoundingBox();
 
         indicator->setContentSize(buttonSize);
         if (indicator != nullptr)
         {
-//            indicator->setWorldPosition(iSelectButton->getWorldPosition());
-            Vec2 center = Vec2((buttonBounds.getMinX() + buttonBounds.getMaxX() / 2),
-                               (buttonBounds.getMinY() + buttonBounds.getMaxY() / 2));
-            indicator->setWorldPosition(buttonBounds.origin);
-            //probably setup the Size
+            //            indicator->setWorldPosition(iSelectButton->getWorldPosition());
+            /*Vec2 center = Vec2((buttonBounds.getMinX() + buttonBounds.getMaxX() / 2),
+                               (buttonBounds.getMinY() + buttonBounds.getMaxY() / 2));*/
+            Vec2 center =
+                Vec2(buttonBounds.origin.x + buttonSize.width / 2, buttonBounds.origin.y + buttonSize.height / 2);
+
+            // center += Vec2(buttonSize.width/2,buttonSize.height/2);
+            indicator->setWorldPosition(center);
+            // probably setup the Size
         }
     }
     else
@@ -106,29 +120,34 @@ void UINavMenu::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event)
 void UINavMenu::update(float delta)
 {
     const float targetScale = 1.1f;
-    const float scaleSpeed = 0.01f; // Adjust as needed
+    const float scaleSpeed  = 0.01f;  // Adjust as needed
 
-    if (scalingUp) {
+    if (scalingUp)
+    {
         currentScale += scaleSpeed;
-        if (currentScale >= targetScale) {
+        if (currentScale >= targetScale)
+        {
             currentScale = targetScale;
-            scalingUp = false;
+            scalingUp    = false;
         }
-    } else {
+    }
+    else
+    {
         currentScale -= scaleSpeed;
-        if (currentScale <= 1.0f) {
+        if (currentScale <= 1.0f)
+        {
             currentScale = 1.0f;
-            scalingUp = true;
+            scalingUp    = true;
         }
     }
 
-    //AXLOG("Scale Reticle %f \n", currentScale);//forgot to initialize currentScale
-    // Apply the scale to your node
+    // AXLOG("Scale Reticle %f \n", currentScale);//forgot to initialize currentScale
+    //  Apply the scale to your node
     indicator->setScale(currentScale);
-    
+
     // Windows is not visible...
     if (selectedButton != nullptr)
     {
-        //selectedButton->setScale(currentScale);
+        // selectedButton->setScale(currentScale);
     }
 }
