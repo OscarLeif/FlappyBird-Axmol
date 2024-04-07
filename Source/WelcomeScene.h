@@ -20,11 +20,19 @@ public:
     //touch interface
 
     //keyboard interface
+    EventListenerKeyboard* keyboardListener;
+    void initKeyboardListener();
 private:
     UINavMenu* navMenu;
     ax::Sprite* _ground[2];
     ax::Rect boundingBox;
     bool touchLocked = false; // Flag to indicate if touch is locked
+    // Gamepad controller listener
+    void onConnectController(Controller* controller, Event* event);
+    void onDisconnectedController(Controller* controller, Event* event);
+    void resetControllerHolderState();
+    void gamepadOnKeyDown(ax::Controller* controller, int keyCode, ax::Event* event);
+    void gamepadOnKeyUp(ax::Controller* controller, int keyCode, ax::Event* event);
 };
 
 

@@ -17,6 +17,7 @@ public:
     BetterButton();
     static BetterButton* create(const std::string normalImage,
                                 const std::string selectedImage,
+                                const std::string disableImage,
                                 ax::ui::Widget::TextureResType);
     virtual bool init(const std::string normalImage,
                       const std::string selectedImage,

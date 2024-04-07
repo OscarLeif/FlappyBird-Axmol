@@ -8,6 +8,7 @@ BetterButton::BetterButton() : leftButton(nullptr), righButton(nullptr), upButto
 
 BetterButton* BetterButton::create(std::string normalImage,
                                    std::string selectedImage,
+                                   std::string disableImage,
                                    ax::ui::Widget::TextureResType textType)
 {
     auto button = new (std::nothrow) BetterButton();

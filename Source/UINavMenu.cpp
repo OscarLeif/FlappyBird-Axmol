@@ -5,6 +5,9 @@
 #include "UINavMenu.h"
 #include "ui/UIScale9Sprite.h"
 
+// In the .cpp file associated with UINavMenu
+bool UINavMenu::readingInput = false;
+
 UINavMenu::UINavMenu() : selectedButton(nullptr), keyboardListener(nullptr), indicator(nullptr), currentScale(0) {}
 
 UINavMenu::~UINavMenu()
@@ -44,7 +47,7 @@ bool UINavMenu::init()
 
 void UINavMenu::initKeyboardListener()
 {
-    keyboardListener= EventListenerKeyboard::create();
+    keyboardListener                = EventListenerKeyboard::create();
     keyboardListener->onKeyPressed  = AX_CALLBACK_2(UINavMenu::onKeyPressed, this);
     keyboardListener->onKeyReleased = AX_CALLBACK_2(UINavMenu::onKeyReleased, this);
     Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(keyboardListener, 1);
@@ -92,6 +95,7 @@ BetterButton* UINavMenu::getFocusButton()
 
 void UINavMenu::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
 {
+    if(UINavMenu::readingInput==false)return;
     switch (keyCode)
     {
     case ax::EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
@@ -149,5 +153,64 @@ void UINavMenu::update(float delta)
     if (selectedButton != nullptr)
     {
         // selectedButton->setScale(currentScale);
+    }
+}
+
+void UINavMenu::RegisterControllerListener()
+{
+    auto gameControllerListener = EventListenerController::create();
+
+    gameControllerListener->onConnected    = AX_CALLBACK_2(UINavMenu::onConnectController, this);
+    gameControllerListener->onDisconnected = AX_CALLBACK_2(UINavMenu::onDisconnectedController, this);
+    gameControllerListener->onKeyDown      = AX_CALLBACK_3(UINavMenu::gamepadOnKeyDown, this);
+    gameControllerListener->onKeyUp        = AX_CALLBACK_3(UINavMenu::gamepadOnKeyUp, this);
+    // gameControllerListener->onAxisEvent = AX_CALLBACK_3(UINavMenu::onAxisEvent, this);//Not used
+
+    getEventDispatcher()->addEventListenerWithSceneGraphPriority(gameControllerListener, this);
+    Controller::startDiscoveryController();
+}
+
+void UINavMenu::onConnectController(ax::Controller* controller, ax::Event* event) {}
+
+void UINavMenu::onDisconnectedController(Controller* controller, Event* event) {}
+
+void UINavMenu::resetControllerHolderState() {}
+
+void UINavMenu::gamepadOnKeyDown(ax::Controller* controller, int keyCode, ax::Event* event)
+{
+    showButtonState(controller, keyCode, true);
+}
+
+void UINavMenu::gamepadOnKeyUp(ax::Controller* controller, int keyCode, ax::Event* event)
+{
+    showButtonState(controller, keyCode, false);
+}
+
+// Handle Gamepad input buttons
+void UINavMenu::showButtonState(ax::Controller* controller, int keyCode, bool isPressed)
+{
+    if (isPressed && selectedButton != nullptr && UINavMenu::readingInput==true)
+    {
+        switch (keyCode)
+        {
+        case Controller::Key::BUTTON_DPAD_UP:
+            setSelectedButton(selectedButton->upButton);
+            break;
+        case Controller::Key::BUTTON_DPAD_DOWN:
+            setSelectedButton(selectedButton->downButton);
+            break;
+        case Controller::Key::BUTTON_DPAD_LEFT:
+            setSelectedButton(selectedButton->leftButton);
+            break;
+        case Controller::Key::BUTTON_DPAD_RIGHT:
+            setSelectedButton(selectedButton->righButton);
+            break;
+        case Controller::Key::BUTTON_DPAD_CENTER:
+            selectedButton->TriggerEventClick();
+        case Controller::Key::BUTTON_A:
+            selectedButton->TriggerEventClick();
+        default:
+            break;
+        }
     }
 }

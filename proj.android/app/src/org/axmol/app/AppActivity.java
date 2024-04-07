@@ -2,7 +2,7 @@
 Copyright (c) 2015-2016 Chukong Technologies Inc.
 Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 Copyright (c) 2019-present Axmol Engine contributors (see AUTHORS.md).
- 
+
 https://axmolengine.github.io/
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,17 +27,19 @@ package org.axmol.app;
 
 import android.os.Bundle;
 import org.axmol.lib.AxmolActivity;
+import org.axmol.lib.GameControllerAdapter;
 import org.axmol.lib.SharedLoader;
 import android.os.Build;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 
 public class AppActivity extends AxmolActivity {
     static {
         // DNT remove, some android simulator require explicit load shared libraries, otherwise will crash
         SharedLoader.load();
     }
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.setEnableVirtualButton(false);
@@ -58,7 +60,40 @@ public class AppActivity extends AxmolActivity {
             getWindow().setAttributes(lp);
         }
         // DO OTHER INITIALIZATION BELOW
-        
+
+    }
+
+    @Override
+    public boolean dispatchKeyEvent (android.view.KeyEvent event)
+    {
+        int source = event.getSource();
+        if (source != InputDevice.SOURCE_KEYBOARD)
+        {
+            int keyCode = event.getKeyCode();
+            int action = event.getAction();
+            String deviceName= event.getDevice().getName();
+            int deviceId = event.getDeviceId();
+
+            int axmolKey = keyCode;
+            if(KeyMappings.ANDROID_TO_AXMOL_MAPPING.containsKey(keyCode))
+            {
+                axmolKey = KeyMappings.ANDROID_TO_AXMOL_MAPPING.get(keyCode);
+            }
+
+            //TODO: We need to handle the Axis Values from Gamepad Cases.
+            switch(action)
+            {
+                case KeyEvent.ACTION_DOWN:
+                    GameControllerAdapter.onButtonEvent(deviceName,deviceId, axmolKey,true,1,false);
+                    return true;
+                case  KeyEvent.ACTION_UP:
+                    GameControllerAdapter.onButtonEvent(deviceName,deviceId, axmolKey,false,0,false);
+                    return true;
+                default:
+                    return super.dispatchKeyEvent(event);
+            }
+        }
+        return true;
     }
 
 }

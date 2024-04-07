@@ -74,7 +74,7 @@ bool WelcomeScene::init()
     // auto play = ax::ui::Button::create("button_play_normal.png", "button_play_pressed.png", "",
     // ax::ui::Widget::TextureResType::PLIST);
     auto play =
-        BetterButton::create("button_play_normal.png", "button_play_pressed.png", Widget::TextureResType::PLIST);
+        BetterButton::create("button_play_normal.png", "button_play_pressed.png", "", Widget::TextureResType::PLIST);
     play->setName("PlayBt");
     //        play->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/3 + origin.y));
     play->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
@@ -88,7 +88,7 @@ bool WelcomeScene::init()
     });
 
 
-    auto exit = BetterButton::create("indicator.png", "", Widget::TextureResType::LOCAL);
+    auto exit = BetterButton::create("indicator.png", "", "", Widget::TextureResType::LOCAL);
     exit->setName("exit");
     exit->setPosition(Vec2(AtaMath::interpolate(minX, maxX, 0.5), AtaMath::interpolate(minY, maxY, .35)));
 
@@ -123,7 +123,10 @@ bool WelcomeScene::init()
     addChild(navMenu);
 
     navMenu->initKeyboardListener();
+    navMenu->RegisterControllerListener();
     navMenu->setSelectedButton(play);
+
+    UINavMenu::readingInput=true;
 
     return true;
 }

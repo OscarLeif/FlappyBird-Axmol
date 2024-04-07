@@ -29,8 +29,8 @@ private:
     void scoreCounter(float dt);
 
 private:
-    Button* _playButton;
-    Button* _scoreButton;
+    BetterButton* _playButton;
+    BetterButton* _scoreButton;
     Sprite* _sparkle;
     Label* _bestScoreLabel;
     Label* _scoreLabel;

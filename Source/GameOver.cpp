@@ -5,17 +5,17 @@
 #include "GameOver.h"
 #include "audio/AudioEngine.h"
 #include "AtaMath.h"
+#include "UINavMenu.h"
 
 using namespace axmol::ui;
-//using namespace CocosDenshion;
-
+// using namespace CocosDenshion;
 
 GameOver* GameOver::create(int score)
 {
     GameOver* gameOver = new (std::nothrow) GameOver();
     if (gameOver && gameOver->init(score))
     {
-        gameOver->autorelease();        
+        gameOver->autorelease();
         return gameOver;
     }
     AX_SAFE_DELETE(gameOver);
@@ -31,14 +31,14 @@ bool GameOver::init(int score)
     _count = 0;
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    Vec2 origin      = Director::getInstance()->getVisibleOrigin();
 
-    //game over label image
+    // game over label image
     auto gameOverLabel = Sprite::createWithSpriteFrameName("label_game_over.png");
     gameOverLabel->setOpacity(0);
 
-    //missing reference
-    auto scene= Director::getInstance()->getRunningScene();
+    // missing reference
+    auto scene      = Director::getInstance()->getRunningScene();
     auto worldScene = scene->getChildByTag(111);
 
     Rect bounds = Rect();
@@ -61,21 +61,24 @@ bool GameOver::init(int score)
     float minY = b.getMinY();
     float maxY = b.getMaxY();
 
-//    gameOverLabel->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*5.0/6 + origin.y));
+    //    gameOverLabel->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*5.0/6 + origin.y));
     float a = AtaMath::interpolate(minY, maxY, 0.75);
-    gameOverLabel->setWorldPosition(Vec2(AtaMath::interpolate(minX, maxX, 0.5), AtaMath::interpolate(minY, maxY, 0.80)));
+    gameOverLabel->setWorldPosition(
+        Vec2(AtaMath::interpolate(minX, maxX, 0.5), AtaMath::interpolate(minY, maxY, 0.80)));
 
     FadeIn* fadeIn = FadeIn::create(0.3f);
     gameOverLabel->runAction(fadeIn);
 
     addChild(gameOverLabel, 2);
 
-    _playButton = Button::create("button_play_normal.png", "button_play_pressed.png", "", Widget::TextureResType::PLIST);
+    _playButton =
+        BetterButton::create("button_play_normal.png", "button_play_pressed.png", "", Widget::TextureResType::PLIST);
     _playButton->setVisible(false);
-//    _playButton->setPosition(Vec2(visibleSize.width/2 - _playButton->getContentSize().width/2 - 8 + origin.x, visibleSize.height/3 + origin.y));
-    _playButton->setPosition(Vec2(AtaMath::interpolate(minX,maxX,0.25), AtaMath::interpolate(minY,maxY,0.35)));
+    //    _playButton->setPosition(Vec2(visibleSize.width/2 - _playButton->getContentSize().width/2 - 8 + origin.x,
+    //    visibleSize.height/3 + origin.y));
+    _playButton->setPosition(Vec2(AtaMath::interpolate(minX, maxX, 0.25), AtaMath::interpolate(minY, maxY, 0.35)));
     _playButton->addClickEventListener([=](Ref* sender) {
-        //SimpleAudioEngine::getInstance()->playEffect("sfx_swooshing.wav");
+        // SimpleAudioEngine::getInstance()->playEffect("sfx_swooshing.wav");
         AudioEngine::play2d("sfx_swooshing.wav");
         EventCustom event("game_restart");
         getEventDispatcher()->dispatchEvent(&event);
@@ -83,21 +86,27 @@ bool GameOver::init(int score)
     });
     addChild(_playButton, 2);
 
-    _scoreButton = Button::create("button_score_normal.png", "button_score_pressed.png", "", Widget::TextureResType::PLIST);
+    _scoreButton =
+        BetterButton::create("button_score_normal.png", "button_score_pressed.png", "", Widget::TextureResType::PLIST);
     _scoreButton->setVisible(false);
-//    _scoreButton->setPosition(Vec2(visibleSize.width/2 + _playButton->getContentSize().width/2 + 8 + origin.x, visibleSize.height/3 + origin.y));
+    //    _scoreButton->setPosition(Vec2(visibleSize.width/2 + _playButton->getContentSize().width/2 + 8 + origin.x,
+    //    visibleSize.height/3 + origin.y));
     _scoreButton->setPosition(Vec2(AtaMath::interpolate(minX, maxX, 0.75), AtaMath::interpolate(minY, maxY, 0.35)));
 
     addChild(_scoreButton, 2);
 
+    _playButton->righButton  = _scoreButton;
+    _scoreButton->leftButton = _playButton;
+
     auto scorePanel = Sprite::createWithSpriteFrameName("panel_score.png");
-    //Vec2 endPos(visibleSize.width/2 + origin.x, visibleSize.height*3.5/6 + origin.y);
-    //Vec2 startPos(visibleSize.width/2 + origin.x, -scorePanel->getContentSize().height/2 + origin.y);
-    Vec2 endPos(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,0.60));
-    Vec2 startPos(AtaMath::interpolate(minX,maxX,0.5), AtaMath::interpolate(minY,maxY,0.65) - visibleSize.y);
-    auto moveTo = MoveTo::create(0.5f, endPos);
-    auto actionDone = CallFunc::create(AX_CALLBACK_0(GameOver::onAnimationFinished, this));
-    auto seq = Sequence::createWithTwoActions(EaseExponentialOut::create(moveTo), actionDone);
+    // Vec2 endPos(visibleSize.width/2 + origin.x, visibleSize.height*3.5/6 + origin.y);
+    // Vec2 startPos(visibleSize.width/2 + origin.x, -scorePanel->getContentSize().height/2 + origin.y);
+    Vec2 endPos(AtaMath::interpolate(minX, maxX, 0.5), AtaMath::interpolate(minY, maxY, 0.60));
+    Vec2 startPos(AtaMath::interpolate(minX, maxX, 0.5), AtaMath::interpolate(minY, maxY, 0.65) - visibleSize.y);
+    auto moveTo             = MoveTo::create(0.5f, endPos);
+    UINavMenu::readingInput = false;
+    auto actionDone         = CallFunc::create(AX_CALLBACK_0(GameOver::onAnimationFinished, this));
+    auto seq                = Sequence::createWithTwoActions(EaseExponentialOut::create(moveTo), actionDone);
     scorePanel->runAction(seq);
     scorePanel->setPosition(startPos);
 
@@ -110,7 +119,6 @@ bool GameOver::init(int score)
     _scoreLabel->setVisible(false);
     scorePanel->addChild(_scoreLabel, 2);
 
-
     _topScore = UserDefault::getInstance()->getIntegerForKey("topScore", 0);
     sprintf(scoreStr, "%d", _topScore);
 
@@ -120,12 +128,24 @@ bool GameOver::init(int score)
 
     const char* medalSprite = nullptr;
 
-    if (_score >= 10) medalSprite = "medal_bronze.png";
-    if (_score >= 20) medalSprite = "medal_silver.png";
-    if (_score >= 30) medalSprite = "medal_gold.png";
-    if (_score >= 40) medalSprite = "medal_platinum.png";
+    if (_score >= 10)
+        medalSprite = "medal_bronze.png";
+    if (_score >= 20)
+        medalSprite = "medal_silver.png";
+    if (_score >= 30)
+        medalSprite = "medal_gold.png";
+    if (_score >= 40)
+        medalSprite = "medal_platinum.png";
 
-    if (medalSprite) {
+    auto navMenu = UINavMenu::create();
+    addChild(navMenu);
+
+    navMenu->setSelectedButton(_playButton);
+    navMenu->initKeyboardListener();
+    navMenu->RegisterControllerListener();
+
+    if (medalSprite)
+    {
         auto medal = Sprite::createWithSpriteFrameName(medalSprite);
         medal->setPosition(Vec2(48, 48));
         scorePanel->addChild(medal, 2);
@@ -133,7 +153,8 @@ bool GameOver::init(int score)
         auto spritecache = SpriteFrameCache::getInstance();
         char spark[32];
         Vector<SpriteFrame*> animFrames(3);
-        for(int i=0; i<3; i++) {
+        for (int i = 0; i < 3; i++)
+        {
             sprintf(spark, "spark_%d.png", i);
             auto frame = spritecache->getSpriteFrameByName(spark);
             animFrames.pushBack(frame);
@@ -141,12 +162,9 @@ bool GameOver::init(int score)
 
         _sparkle = Sprite::createWithSpriteFrame(animFrames.front());
 
-        auto sparkleAnim = Animation::createWithSpriteFrames(animFrames, 1.0f/5);
-        auto shine = RepeatForever::create(
-                Sequence::create(
-                        CallFunc::create(AX_CALLBACK_0(GameOver::randomizeSparkle, this)),
-                        Animate::create(sparkleAnim),
-                        nullptr));
+        auto sparkleAnim = Animation::createWithSpriteFrames(animFrames, 1.0f / 5);
+        auto shine       = RepeatForever::create(Sequence::create(
+            CallFunc::create(AX_CALLBACK_0(GameOver::randomizeSparkle, this)), Animate::create(sparkleAnim), nullptr));
 
         _sparkle->runAction(shine);
         scorePanel->addChild(_sparkle, 2);
@@ -160,8 +178,10 @@ void GameOver::scoreCounter(float dt)
     sprintf(scoreStr, "%d", _count);
     _scoreLabel->setString(scoreStr);
 
-    if (_count == _score) {
-        if (_score > _topScore) {
+    if (_count == _score)
+    {
+        if (_score > _topScore)
+        {
             char scoreStr[32];
             sprintf(scoreStr, "%d", _score);
             _bestScoreLabel->setString(scoreStr);
@@ -170,6 +190,7 @@ void GameOver::scoreCounter(float dt)
     }
 
     _count++;
+    UINavMenu::readingInput = true;
 }
 
 void GameOver::onAnimationFinished()
@@ -178,7 +199,8 @@ void GameOver::onAnimationFinished()
     _playButton->setVisible(true);
     _scoreLabel->setVisible(true);
 
-    if (_topScore < _score) {
+    if (_topScore < _score)
+    {
         UserDefault::getInstance()->setIntegerForKey("topScore", _score);
         UserDefault::getInstance()->flush();
 
@@ -192,10 +214,10 @@ void GameOver::onAnimationFinished()
 
 void GameOver::randomizeSparkle()
 {
-    int angle = axmol::RandomHelper::random_int(0, 360);
+    int angle  = axmol::RandomHelper::random_int(0, 360);
     int radius = axmol::RandomHelper::random_int(0, 22);
-    _sparkle->setPosition(Vec2(radius*sin(angle) + 48, radius*cos(angle) + 48));
+    _sparkle->setPosition(Vec2(radius * sin(angle) + 48, radius * cos(angle) + 48));
 }
 
-//GameOver::GameOver() { }
-//GameOver::~GameOver() { }
+// GameOver::GameOver() { }
+// GameOver::~GameOver() { }
