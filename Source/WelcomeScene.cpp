@@ -35,17 +35,33 @@ bool WelcomeScene::init()
     background->setWorldPosition(Vec2::ZERO);
     // add the background as a child to this layer
     world->addChild(background, 0);
+    Vec2 bgSize           = background->getContentSize();
+    auto backgroundBounds = background->getBoundingBox();
+
+    auto backgroundLeft = Sprite::createWithSpriteFrameName("background_day.png");
+    Vec2 leftBgPos      = Vec2::ZERO;
+    leftBgPos.x -= (bgSize.width - 1);
+    backgroundLeft->setWorldPosition(leftBgPos);
+    world->addChild(backgroundLeft, 0);
+
+    auto backgroundRight = Sprite::createWithSpriteFrameName("background_day.png");
+    Vec2 rightBgPos      = Vec2::ZERO;
+    rightBgPos.x += (bgSize.width-1);
+    backgroundRight->setWorldPosition(rightBgPos);
+    world->addChild(backgroundRight, 0);
 
     boundingBox = background->getBoundingBox();
 
     // Add ground
     _ground[0] = Sprite::createWithSpriteFrameName("ground.png");
     _ground[1] = Sprite::createWithSpriteFrameName("ground.png");
+    _ground[2] = Sprite::createWithSpriteFrameName("ground.png");
 
     auto groundSize = _ground[0]->getContentSize();
 
     _ground[0]->setAnchorPoint(Point::ZERO);
     _ground[1]->setAnchorPoint(Point::ZERO);
+    _ground[2]->setAnchorPoint(Point::ZERO);
 
     //        _ground[0]->setPosition(Point::ZERO);
     //        _ground[1]->setPosition(Vec2(groundSize.width, 0));
@@ -58,9 +74,12 @@ bool WelcomeScene::init()
     _ground[0]->setPosition(Vec2(AtaMath::interpolate(minX, maxX, 0), AtaMath::interpolate(minY, maxY, 0)));
     _ground[1]->setPosition(
         Vec2(AtaMath::interpolate(minX, maxX, 0) + groundSize.width, AtaMath::interpolate(minY, maxY, 0)));
+    _ground[2]->setPosition(
+        Vec2(AtaMath::interpolate(minX, maxX, 0) - groundSize.width, AtaMath::interpolate(minY, maxY, 0)));
 
     world->addChild(_ground[0], 1);
     world->addChild(_ground[1], 1);
+    world->addChild(_ground[2], 1);
 
     auto title = Sprite::createWithSpriteFrameName("label_flappy_bird.png");
     //        title->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height*2.0/3 + origin.y));
@@ -86,7 +105,6 @@ bool WelcomeScene::init()
         navMenu->getParent()->removeChild(navMenu);
         Director::getInstance()->replaceScene(transition);
     });
-
 
     auto exit = BetterButton::create("indicator.png", "", "", Widget::TextureResType::LOCAL);
     exit->setName("exit");
@@ -126,7 +144,7 @@ bool WelcomeScene::init()
     navMenu->RegisterControllerListener();
     navMenu->setSelectedButton(play);
 
-    UINavMenu::readingInput=true;
+    UINavMenu::readingInput = true;
 
     return true;
 }
@@ -134,12 +152,12 @@ bool WelcomeScene::init()
 void WelcomeScene::update(float delta)
 {
     float groundWidth = _ground[0]->getContentSize().width;
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
         _ground[i]->setPositionX(_ground[i]->getPositionX() - 2.0f);
 
-        if (_ground[i]->getPositionX() < -groundWidth)
-            _ground[i]->setPositionX(_ground[i]->getPositionX() + 2 * groundWidth);
+        if (_ground[i]->getPositionX() < -groundWidth*2)
+            _ground[i]->setPositionX(_ground[i]->getPositionX() + 3 * groundWidth);
     }
 
     auto camera = Camera::getDefaultCamera();

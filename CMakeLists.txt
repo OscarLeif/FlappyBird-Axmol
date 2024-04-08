@@ -30,11 +30,11 @@ set(APP_NAME FlappyBird)
 project(${APP_NAME})
 
 # Enable optimization for size
-# if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")
-# elseif(MSVC)
-#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O1")
-# endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")
+elseif(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O1")
+endif()
 
 # add_definitions(-DAX_ENABLE_NAVMESH=0 
 #                 -DAX_ENABLE_3D_PHYSICS=0

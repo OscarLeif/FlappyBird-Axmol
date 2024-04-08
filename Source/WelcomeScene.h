@@ -24,7 +24,7 @@ public:
     void initKeyboardListener();
 private:
     UINavMenu* navMenu;
-    ax::Sprite* _ground[2];
+    ax::Sprite* _ground[3];
     ax::Rect boundingBox;
     bool touchLocked = false; // Flag to indicate if touch is locked
     // Gamepad controller listener
