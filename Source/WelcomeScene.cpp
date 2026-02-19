@@ -53,7 +53,7 @@ bool WelcomeScene::init()
         auto play = ax::ui::Button::create("button_play_normal.png", "button_play_pressed.png", "", ax::ui::Widget::TextureResType::PLIST);
         play->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/3 + origin.y));
 
-        play->addClickEventListener([](Ref* sender) {
+        play->addClickEventListener([](ax::Object* sender) {
             AudioEngine::play2d("sfx_swooshing.wav");
             TransitionScene *transition = TransitionFade::create(0.75f, WorldScene::create());
             Director::getInstance()->replaceScene(transition);

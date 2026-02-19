@@ -2,7 +2,7 @@
  Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  Copyright (c) 2019-present Axmol Engine contributors (see AUTHORS.md).
 
- https://axmolengine.github.io/
+ https://axmol.dev/
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -25,26 +25,46 @@
 
 #include "main.h"
 #include "AppDelegate.h"
-#include "axmol.h"
+#include "platform/Application.h"
 
 // Uncomment to enable win32 console
-// #define USE_WIN32_CONSOLE
+#define USE_WIN32_CONSOLE
 
-USING_NS_AX;
+using namespace ax;
 
+int axmol_main() {
+    // create the application instance
+    AppDelegate app;
+    int ret = Application::getInstance()->run();
+    return ret;
+}
+
+#if !defined(_CONSOLE)
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // create the application instance
 #ifdef USE_WIN32_CONSOLE
 #    include "platform/win32/EmbedConsole.h"
 #endif
 
-    // create the application instance
-    AppDelegate app;
-    int ret = Application::getInstance()->run();
+    auto result = axmol_main();
 
-    return ret;
+#if AX_OBJECT_LEAK_DETECTION
+    Object::printLeaks();
+#endif
+
+    return result;
 }
+#else
+int main(int, char**) {
+    auto result = axmol_main();
+
+#if AX_OBJECT_LEAK_DETECTION
+    Object::printLeaks();
+#endif
+
+    return result;
+}
+#endif

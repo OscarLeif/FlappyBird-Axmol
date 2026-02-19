@@ -40,7 +40,7 @@ class MainScene : public ax::Scene
         menu1,
         menu2,
     };
-    
+
 public:
     bool init() override;
     void update(float delta) override;
@@ -61,7 +61,7 @@ public:
     void onKeyReleased(ax::EventKeyboard::KeyCode code, ax::Event* event);
 
     // a selector callback
-    void menuCloseCallback(Ref* sender);
+    void menuCloseCallback(ax::Object* sender);
 
 private:
     GameState _gameState = GameState::init;

@@ -44,7 +44,7 @@ bool GameOver::init(int score)
     _playButton = Button::create("button_play_normal.png", "button_play_pressed.png", "", Widget::TextureResType::PLIST);
     _playButton->setVisible(false);
     _playButton->setPosition(Vec2(visibleSize.width/2 - _playButton->getContentSize().width/2 - 8 + origin.x, visibleSize.height/3 + origin.y));
-    _playButton->addClickEventListener([=](Ref* sender) {
+    _playButton->addClickEventListener([=](ax::Object* sender) {
         //SimpleAudioEngine::getInstance()->playEffect("sfx_swooshing.wav");
         AudioEngine::play2d("sfx_swooshing.wav");
         EventCustom event("game_restart");

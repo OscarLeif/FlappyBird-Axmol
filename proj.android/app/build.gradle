@@ -1,23 +1,28 @@
 apply plugin: 'com.android.application'
-apply from: project(':libaxmol').projectDir.toString() + "/axutils.gradle"
+apply from: project(':libaxmol').projectDir.toString() + "/../dsl/axmol.gradle"
+
+// Resolve build profiles
+def buildProfiles = AxmolUtils.resolveBuildProfiles(project)
 
 android {
-    namespace "ata.games.flappybird"
-    compileSdk PROP_COMPILE_SDK_VERSION.toInteger()
+    def packageName = buildProfiles['packageName']
+    def cmakeVer = buildProfiles['cmakeVer']
+    def cmakeOptions = Eval.me(buildProfiles['cmakeOptions'])
+    def minSdk = buildProfiles['minSdk']
+    def targetSdk = buildProfiles['targetSdk']
 
-    // Setup native build tools: ndk & cmake
-    def nbtInfo = axutils.findNativeBuildTools(project, '3.28.1+')
-    ndkVersion = nbtInfo[0]
-    if(nbtInfo[1]) {
-        ndkPath = nbtInfo[1]
+    // Apply build profiles
+    namespace = packageName
+    compileSdk = targetSdk.toInteger()
+    ndkVersion = buildProfiles['ndkVer']
+    if(buildProfiles.containsKey('ndkPath')) {
+        ndkPath = buildProfiles['ndkPath']
     }
-    def cmakeVer = nbtInfo[2]
-    def cmakeOptions = Eval.me(nbtInfo[3])
 
     defaultConfig {
-        applicationId "ata.games.flappybird"
-        minSdkVersion PROP_MIN_SDK_VERSION
-        targetSdkVersion PROP_TARGET_SDK_VERSION
+        applicationId packageName
+        minSdkVersion minSdk
+        targetSdkVersion targetSdk
         versionCode 1
         versionName "1.0"
 
@@ -30,8 +35,8 @@ android {
         }
 
         ndk {
-            abiFilters = []
-            abiFilters.addAll(PROP_APP_ABI.split(':').collect{it as String})
+            // noinspection ChromeOsAbiSupport
+            abiFilters = __1K_ARCHS.split(':').collect{it as String}
         }
     }
 
@@ -44,13 +49,13 @@ android {
 
     externalNativeBuild {
         cmake {
-            version "$cmakeVer"
+            version = cmakeVer
             path "../../CMakeLists.txt"
         }
     }
 
     signingConfigs {
-       release {
+        release {
             if (project.hasProperty("KEY_STORE_FILE")) {
                 storeFile file(KEY_STORE_FILE)
                 storePassword KEY_STORE_PASSWORD
@@ -64,10 +69,11 @@ android {
         release {
             debuggable false
             jniDebuggable false
-            renderscriptDebuggable false
             minifyEnabled true
-            shrinkResources true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFile file(project(':libaxmol').projectDir.toString() + '/proguard-rules.pro')
+            signingConfig signingConfigs.debug
             if (project.hasProperty("KEY_STORE_FILE")) {
                 signingConfig signingConfigs.release
             }
@@ -76,26 +82,15 @@ android {
         debug {
             debuggable true
             jniDebuggable true
-            renderscriptDebuggable true
         }
     }
 
     aaptOptions {
-       noCompress 'mp3','ogg','wav','mp4','ttf','ttc'
+        noCompress 'mp3','ogg','wav','mp4','ttf','ttc','otf'
     }
 
     buildFeatures {
-        aidl true
-    }
-
-    // Define a new task to build a release apk
-    task buildRelease(type:GradleBuild)
-    {
-        dependsOn 'assembleRelease'
-        tasks = ['clean', 'assembleRelease']
-        doLast {
-            println "Release APK is generated successfully!"
-        }
+        aidl = true
     }
 }
 
@@ -127,12 +122,84 @@ dependencies {
 project.afterEvaluate {
     android.applicationVariants.configureEach { variant ->
         def variantName = variant.name.capitalize()
-        def externalNativeBuild = tasks.named("externalNativeBuild${variantName}")
-        if (externalNativeBuild) {
-            def copyContentToAssets = tasks.named("copy${variantName}ContentToAssets")
-            copyContentToAssets
-            copyContentToAssets.get().dependsOn externalNativeBuild
-            tasks.named("compile${variantName}JavaWithJavac").get().dependsOn copyContentToAssets
+        def copyTask = tasks.named("copy${variantName}ContentToAssets")
+
+        // !!!IMPORTANT: This copy task must depend on the native build task.
+        // Without this dependency, the copy step may run before native libraries
+        // are built, resulting in incomplete or outdated assets being packaged
+        // into the APK. Do not remove or modify this dependency, as it ensures
+        // the correct build order: native build -> copy assets -> merge assets -> AAB/APK.
+        copyTask.configure {
+            dependsOn(tasks.named("externalNativeBuild${variantName}"))
+        }
+
+        tasks.named("merge${variantName}Assets").configure {
+            dependsOn(copyTask)
+        }
+    }
+}
+
+// --- Custom Comparison Tasks ---
+
+// --- Helper to delete folders ---
+def performClean(Project project) {
+    def dirs = ["${project.projectDir}/.cxx", "${project.projectDir}/build"]
+    dirs.each { path ->
+        def dir = file(path)
+        if (dir.exists()) {
+            println "Cleaning: ${path}"
+            dir.deleteDir()
+        }
+    }
+}
+
+// Helper function to keep the code clean
+def nukeCache(Project project) {
+    println "--- NUKING CACHE ---"
+    // Maybe my mistake was on clean the build folder.
+    def targets = ["${project.projectDir}/.cxx", "${project.projectDir}/build"]
+    targets.each { path ->
+        def folder = file(path)
+        if (folder.exists()) {
+            println "Removing: ${path}"
+            folder.deleteDir()
+        }
+    }
+}
+
+tasks.register("buildDebugFresh") {
+    group = "axmol_tools"
+    description = "Cleans everything and builds a Debug APK"
+
+    // This is the magic part: it runs BEFORE the build starts
+    //doFirst {
+    //    nukeCache(project)
+    //}
+
+    dependsOn "assembleDebug"
+
+    doLast {
+        def apk = file("build/outputs/apk/debug/app-debug.apk")
+        if (apk.exists()) {
+            println "DEBUG APK READY: ${String.format("%.2f", apk.length() / 1024 / 1024)} MB"
+        }
+    }
+}
+
+tasks.register("buildReleaseFresh") {
+    group = "axmol_tools"
+    description = "Builds a Release APK"
+
+    //doFirst {
+    //    nukeCache(project)
+    //}
+
+    dependsOn "assembleRelease"
+
+    doLast {
+        def apk = file("build/outputs/apk/release/app-release.apk")
+        if (apk.exists()) {
+            println "RELEASE APK READY: ${String.format("%.2f", apk.length() / 1024 / 1024)} MB"
         }
     }
 }
