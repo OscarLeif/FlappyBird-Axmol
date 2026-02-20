@@ -13,6 +13,18 @@ USING_NS_AX;
 #include "WorldScene.h"
 #include "AtaMath.h"
 #include "UINavMenu.h"
+#include "ImGui/ImGuiPresenter.h"
+
+
+#include "Inspector/Inspector.h"
+
+#if AX_ENABLE_EXT_IMGUI
+#include "Inspector/Inspector.h"
+#endif
+
+using namespace ax;
+USING_NS_AX_EXT;
+
 
 bool WelcomeScene::init()
 {
@@ -99,7 +111,7 @@ bool WelcomeScene::init()
     play->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
     play->setPosition(Vec2(AtaMath::interpolate(minX, maxX, 0.5), AtaMath::interpolate(minY, maxY, .45)));
 
-    play->addClickEventListener([&](Ref* sender) {
+    play->addClickEventListener([&](ax::Object* sender) {
         AudioEngine::play2d("sfx_swooshing.wav");
         TransitionScene* transition = TransitionFade::create(0.75f, WorldScene::create());
         navMenu->getParent()->removeChild(navMenu);
@@ -148,6 +160,26 @@ bool WelcomeScene::init()
 
     return true;
 }
+
+void WelcomeScene::onEnter()
+{
+    Scene::onEnter();
+
+    extension::Inspector::getInstance()->openForScene(this);
+#if AX_ENABLE_EXT_IMGUI
+    extension::Inspector::getInstance()->openForScene(this);
+#endif
+}
+
+void WelcomeScene::onExit()
+{
+#if AX_ENABLE_EXT_IMGUI
+    extension::Inspector::getInstance()->close();
+#endif
+    Scene::onExit();
+}
+
+
 
 void WelcomeScene::update(float delta)
 {

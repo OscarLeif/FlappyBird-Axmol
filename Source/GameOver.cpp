@@ -77,7 +77,7 @@ bool GameOver::init(int score)
     //    _playButton->setPosition(Vec2(visibleSize.width/2 - _playButton->getContentSize().width/2 - 8 + origin.x,
     //    visibleSize.height/3 + origin.y));
     _playButton->setPosition(Vec2(AtaMath::interpolate(minX, maxX, 0.25), AtaMath::interpolate(minY, maxY, 0.35)));
-    _playButton->addClickEventListener([=](Ref* sender) {
+    _playButton->addClickEventListener([=](ax::Object* sender) {
         // SimpleAudioEngine::getInstance()->playEffect("sfx_swooshing.wav");
         AudioEngine::play2d("sfx_swooshing.wav");
         EventCustom event("game_restart");

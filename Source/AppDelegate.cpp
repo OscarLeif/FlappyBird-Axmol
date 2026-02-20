@@ -33,39 +33,46 @@
 #    include "audio/AudioEngine.h"
 #endif
 
-USING_NS_AX;
+using namespace ax;
 
-static ax::Size designResolutionSize = ax::Size(288, 512);//default (1280,720)
+#include "Inspector/Inspector.h"
+#if AX_ENABLE_EXT_IMGUI
+
+#endif
+
+static ax::Size designResolutionSize = ax::Size(720, 1280);//default (1280,720)
 
 AppDelegate::AppDelegate() {}
 
 AppDelegate::~AppDelegate() {}
 
-// if you want a different context, modify the value of glContextAttrs
+// if you want a different context, modify the value of gfxContextAttrs
 // it will affect all platforms
-void AppDelegate::initGLContextAttrs()
+void AppDelegate::initGfxContextAttrs()
 {
-    // set OpenGL context attributes: red,green,blue,alpha,depth,stencil,multisamplesCount
-    GLContextAttrs glContextAttrs = {8, 8, 8, 8, 24, 8, 0};
+    // set graphics context attributes: red,green,blue,alpha,depth,stencil,multisamplesCount
+    GfxContextAttrs gfxContextAttrs = {8, 8, 8, 8, 24, 8, 0};
+    // since axmol-2.2 vsync was enabled in engine by default
+    // gfxContextAttrs.vsync = false;
 
-    GLView::setGLContextAttrs(glContextAttrs);
+    RenderView::setGfxContextAttrs(gfxContextAttrs);
 }
 
 bool AppDelegate::applicationDidFinishLaunching()
 {
     // initialize director
     auto director = Director::getInstance();
-    auto glView   = director->getGLView();
-    if (!glView)
+    auto renderView   = director->getRenderView();
+    if (!renderView)
     {
 #if (AX_TARGET_PLATFORM == AX_PLATFORM_WIN32) || (AX_TARGET_PLATFORM == AX_PLATFORM_MAC) || \
     (AX_TARGET_PLATFORM == AX_PLATFORM_LINUX)
-        //glView = GLViewImpl::createWithRect("FlappyBird", ax::Rect(0, 0, designResolutionSize.width, designResolutionSize.height), 1.0F, true);
-        glView = GLViewImpl::create("FlappyBird", true);  // Android means use fullscreen resolution
-#else        
-        glView = GLViewImpl::create("FlappyBird"); // Android means use fullscreen resolution
+        renderView = RenderViewImpl::createWithRect("FlappyBird", ax::Rect(0, 0, designResolutionSize.width, designResolutionSize.height), 1.0F, true);
+        //glView = GLViewImpl::create("FlappyBird", true);  // Android means use fullscreen resolution this will not work on new versions
+#else
+        renderView = RenderViewImpl::createWithFullScreen("FlappyBird"); // Android means use fullscreen resolution
 #endif
-        director->setGLView(glView);
+        director->setRenderView(renderView);
     }
 
     // turn on display FPS
@@ -74,10 +81,16 @@ bool AppDelegate::applicationDidFinishLaunching()
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0f / 60);
 
-    // Set the design resolution
-    //    glView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height,
-    //                                    ResolutionPolicy::SHOW_ALL);
-    
+    auto frameSize = renderView->getFrameSize(); // Use FrameSize for physical aspect ratio
+    float aspectRatio = frameSize.width / frameSize.height;
+
+    if (aspectRatio > 1.0f) {
+        // Landscape (TV)
+        renderView->setDesignResolutionSize(1280, 720, ResolutionPolicy::FIXED_HEIGHT);
+    } else {
+        // Portrait (Phone)
+        renderView->setDesignResolutionSize(720, 1280, ResolutionPolicy::FIXED_WIDTH);
+    }
 
     auto sharedFileUtils = FileUtils::getInstance();
     std::vector<std::string> searchPaths;
@@ -86,12 +99,13 @@ bool AppDelegate::applicationDidFinishLaunching()
     sharedFileUtils->setSearchPaths(searchPaths);
 
     // create a scene. it's an autorelease object
-    auto scene = utils::createInstance<MainScene>();
+    //auto scene = utils::createInstance<MainScene>();
 
     auto welcomeScene = utils::createInstance<WelcomeScene>();
 
     // run
     director->runWithScene(welcomeScene);
+
 
     return true;
 }
@@ -119,25 +133,22 @@ void AppDelegate::applicationWillEnterForeground()
 #if (AX_TARGET_PLATFORM == AX_PLATFORM_ANDROID)
 void AppDelegate::applicationScreenSizeChanged(int newWidth, int newHeight)
 {
-    if (newWidth <= 0 || newHeight <= 0)
-    {
-        return;
-    }
+    if (newWidth <= 0 || newHeight <= 0) return;
 
     auto director = Director::getInstance();
-    auto glView= director->getGLView();
-    if (glView)
+    auto renderView = director->getRenderView();
+    if (renderView)
     {
-        auto size = glView->getFrameSize();
-        if (size.equals(Size(newWidth, newHeight)))
-            return;
+        auto frameSize = renderView->getFrameSize(); // Use FrameSize for physical aspect ratio
+        float aspectRatio = frameSize.width / frameSize.height;
 
-        glView->setFrameSize(newWidth, newHeight);
-
-        ResolutionPolicy resolutionPolicy = glView->getResolutionPolicy();
-        if (resolutionPolicy == ResolutionPolicy::UNKNOWN)
-            resolutionPolicy = ResolutionPolicy::SHOW_ALL;
-        glView->setDesignResolutionSize(newWidth, newHeight, resolutionPolicy);
+        if (aspectRatio > 1.0f) {
+            // Landscape (TV)
+            renderView->setDesignResolutionSize(1280, 720, ResolutionPolicy::FIXED_HEIGHT);
+        } else {
+            // Portrait (Phone)
+            renderView->setDesignResolutionSize(720, 1280, ResolutionPolicy::FIXED_WIDTH);
+        }
     }
 }
 #endif

@@ -14,7 +14,7 @@
                    android:value="FlappyBird" />
 
         <activity
-            android:name="org.axmol.app.AppActivity"
+            android:name="dev.axmol.app.AppActivity"
             android:screenOrientation="fullSensor"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"

@@ -215,7 +215,7 @@ void MainScene::update(float delta)
     {
         /////////////////////////////
         // Add your codes below...like....
-        // 
+        //
         // UpdateJoyStick();
         // UpdatePlayer();
         // UpdatePhysics();
@@ -236,7 +236,7 @@ void MainScene::update(float delta)
     case GameState::menu1:
     {    /////////////////////////////
         // Add your codes below...like....
-        // 
+        //
         // UpdateMenu1();
         break;
     }
@@ -244,7 +244,7 @@ void MainScene::update(float delta)
     case GameState::menu2:
     {    /////////////////////////////
         // Add your codes below...like....
-        // 
+        //
         // UpdateMenu2();
         break;
     }
@@ -252,7 +252,7 @@ void MainScene::update(float delta)
     case GameState::end:
     {    /////////////////////////////
         // Add your codes below...like....
-        // 
+        //
         // CleanUpMyCrap();
         menuCloseCallback(this);
         break;
@@ -261,7 +261,7 @@ void MainScene::update(float delta)
     } //switch
 }
 
-void MainScene::menuCloseCallback(Ref* sender)
+void MainScene::menuCloseCallback(ax::Object* sender)
 {
     // Close the axmol game scene and quit the application
     _director->end();
