@@ -2,8 +2,8 @@
 // Created by oscar on 3/13/2024.
 //
 
-#ifndef FLAPPYBIRD_WORLDSCENE_H
-#define FLAPPYBIRD_WORLDSCENE_H
+#ifndef FLAPPYBIRD_GAMESCENE_H
+#define FLAPPYBIRD_GAMESCENE_H
 
 
 #include "axmol.h"
@@ -23,7 +23,7 @@ enum GameState
     OVER
 };
 
-class WorldScene : public ax::Scene
+class GameScene : public ax::Scene
 {
 public:
     // implement the "static create()" method manually
@@ -54,4 +54,4 @@ private:
 };
 
 
-#endif //FLAPPYBIRD_WORLDSCENE_H
+#endif //FLAPPYBIRD_GAMESCENE_H

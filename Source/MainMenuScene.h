@@ -2,12 +2,12 @@
 // Created by oscar on 3/12/2024.
 //
 
-#ifndef FLAPPYBIRD_WELCOMESCENE_H
-#define FLAPPYBIRD_WELCOMESCENE_H
+#ifndef FLAPPYBIRD_MAINMENUSCENE_H
+#define FLAPPYBIRD_MAINMENUSCENE_H
 
 #include "axmol.h"
 
-class WelcomeScene :public ax::Scene
+class MainMenuScene : public ax::Scene
 {
 public:
     bool init() override;
@@ -21,4 +21,4 @@ private:
 };
 
 
-#endif //FLAPPYBIRD_WELCOMESCENE_H
+#endif //FLAPPYBIRD_MAINMENUSCENE_H

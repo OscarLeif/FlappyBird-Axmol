@@ -2,16 +2,17 @@
 // Created by oscar on 3/12/2024.
 //
 
-#include "WelcomeScene.h"
+#include "MainMenuScene.h"
 #include "ui/axmol-ui.h"
 #include "audio/AudioEngine.h"
 
 USING_NS_AX;
 
 #include "Bird.h"
-#include "WorldScene.h"
+#include "GameScene.h"
+#include "HelloWorld.h"
 
-bool WelcomeScene::init()
+bool MainMenuScene::init()
 {
         if (!Scene::init())
             return false;
@@ -54,8 +55,10 @@ bool WelcomeScene::init()
         play->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/3 + origin.y));
 
         play->addClickEventListener([](ax::Object* sender) {
+            auto btn = static_cast<ui::Button*>(sender);
+            btn->setEnabled(false);
             AudioEngine::play2d("sfx_swooshing.wav");
-            TransitionScene *transition = TransitionFade::create(0.75f, WorldScene::create());
+            TransitionScene *transition = TransitionFade::create(0.75f, GameScene::create());
             Director::getInstance()->replaceScene(transition);
         });
 
@@ -72,7 +75,7 @@ bool WelcomeScene::init()
         return true;
 }
 
-void WelcomeScene::update(float delta)
+void MainMenuScene::update(float delta)
 {
     float groundWidth = _ground[0]->getContentSize().width;
     for (int i=0; i<2; i++) {

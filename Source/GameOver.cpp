@@ -2,8 +2,10 @@
 // Created by oscar on 3/13/2024.
 //
 
+#include <2d/Node.h>
 #include "GameOver.h"
 #include "audio/AudioEngine.h"
+#include "GameScene.h"
 
 using namespace axmol::ui;
 //using namespace CocosDenshion;
@@ -47,9 +49,12 @@ bool GameOver::init(int score)
     _playButton->addClickEventListener([=](ax::Object* sender) {
         //SimpleAudioEngine::getInstance()->playEffect("sfx_swooshing.wav");
         AudioEngine::play2d("sfx_swooshing.wav");
-        EventCustom event("game_restart");
-        getEventDispatcher()->dispatchEvent(&event);
-        this->removeFromParentAndCleanup(true);
+        //EventCustom event("game_restart");
+        //getEventDispatcher()->dispatchEvent(&event);
+
+        TransitionScene *transition = TransitionFade::create(0.75f, GameScene::create());
+        Director::getInstance()->replaceScene(transition);
+        //this->removeFromParentAndCleanup(true);
     });
     addChild(_playButton, 2);
 

@@ -23,7 +23,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#include "MainScene.h"
+#include "HelloWorld.h"
 
 USING_NS_AX;
 
@@ -33,11 +33,11 @@ static void problemLoading(const char* filename)
     printf("Error while loading: %s\n", filename);
     printf(
         "Depending on how you compiled you might have to add 'Content/' in front of filenames in "
-        "MainScene.cpp\n");
+        "HelloWorld.cpp\n");
 }
 
 // on "init" you need to initialize your instance
-bool MainScene::init()
+bool HelloWorld::init()
 {
     //////////////////////////////
     // 1. super init first
@@ -57,7 +57,7 @@ bool MainScene::init()
 
     // add a "close" icon to exit the progress. it's an autorelease object
     auto closeItem = MenuItemImage::create("CloseNormal.png", "CloseSelected.png",
-        AX_CALLBACK_1(MainScene::menuCloseCallback, this));
+        AX_CALLBACK_1(HelloWorld::menuCloseCallback, this));
 
     if (closeItem == nullptr || closeItem->getContentSize().width <= 0 || closeItem->getContentSize().height <= 0)
     {
@@ -80,21 +80,21 @@ bool MainScene::init()
 
     // Some templates (uncomment what you  need)
     auto touchListener = EventListenerTouchAllAtOnce::create();
-    touchListener->onTouchesBegan = AX_CALLBACK_2(MainScene::onTouchesBegan, this);
-    touchListener->onTouchesMoved = AX_CALLBACK_2(MainScene::onTouchesMoved, this);
-    touchListener->onTouchesEnded = AX_CALLBACK_2(MainScene::onTouchesEnded, this);
+    touchListener->onTouchesBegan = AX_CALLBACK_2(HelloWorld::onTouchesBegan, this);
+    touchListener->onTouchesMoved = AX_CALLBACK_2(HelloWorld::onTouchesMoved, this);
+    touchListener->onTouchesEnded = AX_CALLBACK_2(HelloWorld::onTouchesEnded, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 
     //auto mouseListener           = EventListenerMouse::create();
-    //mouseListener->onMouseMove   = AX_CALLBACK_1(MainScene::onMouseMove, this);
-    //mouseListener->onMouseUp     = AX_CALLBACK_1(MainScene::onMouseUp, this);
-    //mouseListener->onMouseDown   = AX_CALLBACK_1(MainScene::onMouseDown, this);
-    //mouseListener->onMouseScroll = AX_CALLBACK_1(MainScene::onMouseScroll, this);
+    //mouseListener->onMouseMove   = AX_CALLBACK_1(HelloWorld::onMouseMove, this);
+    //mouseListener->onMouseUp     = AX_CALLBACK_1(HelloWorld::onMouseUp, this);
+    //mouseListener->onMouseDown   = AX_CALLBACK_1(HelloWorld::onMouseDown, this);
+    //mouseListener->onMouseScroll = AX_CALLBACK_1(HelloWorld::onMouseScroll, this);
     //_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 
     //auto keyboardListener           = EventListenerKeyboard::create();
-    //keyboardListener->onKeyPressed  = AX_CALLBACK_2(MainScene::onKeyPressed, this);
-    //keyboardListener->onKeyReleased = AX_CALLBACK_2(MainScene::onKeyReleased, this);
+    //keyboardListener->onKeyPressed  = AX_CALLBACK_2(HelloWorld::onKeyPressed, this);
+    //keyboardListener->onKeyReleased = AX_CALLBACK_2(HelloWorld::onKeyReleased, this);
     //_eventDispatcher->addEventListenerWithFixedPriority(keyboardListener, 11);
 
 
@@ -138,12 +138,11 @@ bool MainScene::init()
 
     // scheduleUpdate() is required to ensure update(float) is called on every loop
     scheduleUpdate();
-
     return true;
 }
 
 
-void MainScene::onTouchesBegan(const std::vector<ax::Touch*>& touches, ax::Event* event)
+void HelloWorld::onTouchesBegan(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
     for (auto&& t : touches)
     {
@@ -151,7 +150,7 @@ void MainScene::onTouchesBegan(const std::vector<ax::Touch*>& touches, ax::Event
     }
 }
 
-void MainScene::onTouchesMoved(const std::vector<ax::Touch*>& touches, ax::Event* event)
+void HelloWorld::onTouchesMoved(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
     for (auto&& t : touches)
     {
@@ -159,7 +158,7 @@ void MainScene::onTouchesMoved(const std::vector<ax::Touch*>& touches, ax::Event
     }
 }
 
-void MainScene::onTouchesEnded(const std::vector<ax::Touch*>& touches, ax::Event* event)
+void HelloWorld::onTouchesEnded(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
     for (auto&& t : touches)
     {
@@ -167,41 +166,41 @@ void MainScene::onTouchesEnded(const std::vector<ax::Touch*>& touches, ax::Event
     }
 }
 
-void MainScene::onMouseDown(Event* event)
+void HelloWorld::onMouseDown(Event* event)
 {
     EventMouse* e = static_cast<EventMouse*>(event);
     AXLOG("onMouseDown detected, Key: %d", static_cast<int>(e->getMouseButton()));
 }
 
-void MainScene::onMouseUp(Event* event)
+void HelloWorld::onMouseUp(Event* event)
 {
     EventMouse* e = static_cast<EventMouse*>(event);
     AXLOG("onMouseUp detected, Key: %d", static_cast<int>(e->getMouseButton()));
 }
 
-void MainScene::onMouseMove(Event* event)
+void HelloWorld::onMouseMove(Event* event)
 {
     EventMouse* e = static_cast<EventMouse*>(event);
     AXLOG("onMouseMove detected, X:%f  Y:%f", e->getCursorX(), e->getCursorY());
 }
 
-void MainScene::onMouseScroll(Event* event)
+void HelloWorld::onMouseScroll(Event* event)
 {
     EventMouse* e = static_cast<EventMouse*>(event);
     AXLOG("onMouseScroll detected, X:%f  Y:%f", e->getScrollX(), e->getScrollY());
 }
 
-void MainScene::onKeyPressed(EventKeyboard::KeyCode code, Event* event)
+void HelloWorld::onKeyPressed(EventKeyboard::KeyCode code, Event* event)
 {
     AXLOG("onKeyPressed, keycode: %d", static_cast<int>(code));
 }
 
-void MainScene::onKeyReleased(EventKeyboard::KeyCode code, Event* event)
+void HelloWorld::onKeyReleased(EventKeyboard::KeyCode code, Event* event)
 {
     AXLOG("onKeyReleased, keycode: %d", static_cast<int>(code));
 }
 
-void MainScene::update(float delta)
+void HelloWorld::update(float delta)
 {
     switch (_gameState)
     {
@@ -261,11 +260,10 @@ void MainScene::update(float delta)
     } //switch
 }
 
-void MainScene::menuCloseCallback(ax::Object* sender)
+void HelloWorld::menuCloseCallback(ax::Object* sender)
 {
     // Close the axmol game scene and quit the application
     _director->end();
-
     /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use
      * _director->end() as given above,instead trigger a custom event created in RootViewController.mm
      * as below*/

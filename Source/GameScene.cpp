@@ -1,4 +1,4 @@
-#include "WorldScene.h"
+#include "GameScene.h"
 #include "ui/CocosGUI.h"
 #include "GameOver.h"
 #include "PhysicsHelper.h"
@@ -9,9 +9,9 @@ USING_NS_AX;
 //using namespace CocosDenshion;
 using namespace ax::ui;
 
-Scene* WorldScene::create()
+Scene* GameScene::create()
 {
-    auto scene = new (std::nothrow) WorldScene();
+    auto scene = new (std::nothrow) GameScene();
     if (scene && scene->init())
     {
         scene->autorelease();
@@ -21,7 +21,7 @@ Scene* WorldScene::create()
     return nullptr;
 }
 
-bool WorldScene::init()
+bool GameScene::init()
 {
     if (!Scene::initWithPhysics())
         return false;
@@ -93,14 +93,14 @@ bool WorldScene::init()
 
     _touchOneByOneListenr = EventListenerTouchOneByOne::create();
     _touchOneByOneListenr->setSwallowTouches(false);
-    _touchOneByOneListenr->onTouchBegan = AX_CALLBACK_2(WorldScene::onTouchBegan, this);
+    _touchOneByOneListenr->onTouchBegan = AX_CALLBACK_2(GameScene::onTouchBegan, this);
 
     getEventDispatcher()->addEventListenerWithSceneGraphPriority(_touchOneByOneListenr, this);
     auto contactListener = EventListenerPhysicsContact::create();
-    contactListener->onContactBegin = AX_CALLBACK_1(WorldScene::onPhysicsContactBegin, this);
+    contactListener->onContactBegin = AX_CALLBACK_1(GameScene::onPhysicsContactBegin, this);
     getEventDispatcher()->addEventListenerWithSceneGraphPriority(contactListener, this);
 
-    auto eventListener = EventListenerCustom::create("game_restart", [=](EventCustom* event) {
+    auto eventListener = EventListenerCustom::create("game_restart", [=, this](EventCustom* event) {
         restartGame();
     });
     getEventDispatcher()->addEventListenerWithSceneGraphPriority(eventListener, this);
@@ -108,7 +108,7 @@ bool WorldScene::init()
     return true;
 }
 
-void WorldScene::addPipes()
+void GameScene::addPipes()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     int x = visibleSize.width + PIPE_HORIZONTAL_GAP;
@@ -127,7 +127,7 @@ void WorldScene::addPipes()
     }
 }
 
-void WorldScene::addBird()
+void GameScene::addBird()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -142,7 +142,7 @@ void WorldScene::addBird()
     _gameNode->addChild(_bird);
 }
 
-int WorldScene::getRandomPipeY()
+int GameScene::getRandomPipeY()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     int startY = _ground[0]->getContentSize().height + PIPE_VERTICAL_GAP/2.0f + PIPE_BOTTOM_MARGIN;
@@ -151,7 +151,7 @@ int WorldScene::getRandomPipeY()
     return ax::RandomHelper::random_int(startY, endY);
 }
 
-bool WorldScene::onTouchBegan(Touch* touch, Event* event)
+bool GameScene::onTouchBegan(Touch* touch, Event* event)
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     switch(_state) {
@@ -183,7 +183,7 @@ bool WorldScene::onTouchBegan(Touch* touch, Event* event)
  * Returning false from this callback let ignore this collision by the physics world
  * or return true to process it normally
  */
-bool WorldScene::onPhysicsContactBegin(const PhysicsContact &contact)
+bool GameScene::onPhysicsContactBegin(const PhysicsContact &contact)
 {
 #if BIRD_BODY_NOT_REMOVED_FROM_WORLD
     if (_state == GameState::OVER) {
@@ -257,7 +257,7 @@ bool WorldScene::onPhysicsContactBegin(const PhysicsContact &contact)
     return true;
 }
 
-void WorldScene::update(float dt)
+void GameScene::update(float dt)
 {
 
     if (_state == GameState::OVER) {
@@ -307,7 +307,7 @@ void WorldScene::update(float dt)
     }
 }
 
-void WorldScene::onGameOver()
+void GameScene::onGameOver()
 {
     _score->setVisible(false);
     _instruction->setVisible(false);
@@ -320,7 +320,7 @@ void WorldScene::onGameOver()
     addChild(gameOver, 1);
 }
 
-void WorldScene::restartGame()
+void GameScene::restartGame()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -347,7 +347,7 @@ void WorldScene::restartGame()
     scheduleUpdate();
 }
 
-void WorldScene::doShake()
+void GameScene::doShake()
 {
     stopAllActions();
     _gameNode->runAction(Shake::create(.2f, Vec2(3, 3)));

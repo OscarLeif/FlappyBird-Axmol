@@ -24,8 +24,8 @@
  ****************************************************************************/
 
 #include "AppDelegate.h"
-#include "MainScene.h"
-#include "WelcomeScene.h"
+#include "HelloWorld.h"
+#include "MainMenuScene.h"
 
 #define USE_AUDIO_ENGINE 1
 
@@ -37,9 +37,9 @@ USING_NS_AX;
 
 static ax::Size designResolutionSize = ax::Size(288, 512);//default (1280,720)
 
-AppDelegate::AppDelegate() {}
+AppDelegate::AppDelegate() = default;
 
-AppDelegate::~AppDelegate() {}
+AppDelegate::~AppDelegate() = default;
 
 // if you want a different context, modify the value of glContextAttrs
 // it will affect all platforms
@@ -53,9 +53,11 @@ void AppDelegate::initGLContextAttrs()
 
 bool AppDelegate::applicationDidFinishLaunching()
 {
+    // Forces all textures to load at half the memory cost (16-bit)
+    Texture2D::setDefaultAlphaPixelFormat(backend::PixelFormat::RGBA4);
     // initialize director
     auto director = Director::getInstance();
-    auto glView   = director->getGLView();
+    auto glView   = director->getRenderView();
     if (!glView)
     {
 #if (AX_TARGET_PLATFORM == AX_PLATFORM_WIN32) || (AX_TARGET_PLATFORM == AX_PLATFORM_MAC) || \
@@ -63,9 +65,9 @@ bool AppDelegate::applicationDidFinishLaunching()
         glView = GLViewImpl::createWithRect(
             "FlappyBird", ax::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 #else
-        glView = GLViewImpl::create("FlappyBird");
+        glView = RenderViewImpl::create("FlappyBird");
 #endif
-        director->setGLView(glView);
+        director->setRenderView(glView);
     }
 
     // turn on display FPS
@@ -85,9 +87,9 @@ bool AppDelegate::applicationDidFinishLaunching()
     sharedFileUtils->setSearchPaths(searchPaths);
 
     // create a scene. it's an autorelease object
-    auto scene = utils::createInstance<MainScene>();
+    //auto scene = utils::createInstance<HelloWorld>();
 
-    auto welcomeScene = utils::createInstance<WelcomeScene>();
+    auto welcomeScene = utils::createInstance<MainMenuScene>();
 
     // run
     director->runWithScene(welcomeScene);

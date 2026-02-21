@@ -18,41 +18,56 @@ Bird* Bird::create()
     return nullptr;
 }
 
+Bird::Bird() : _idle(nullptr), _fly(nullptr), _swing(nullptr) {}
+
+Bird::~Bird()
+{
+    // Clean up retained actions to prevent memory leaks
+    AX_SAFE_RELEASE(_idle);
+    AX_SAFE_RELEASE(_fly);
+    AX_SAFE_RELEASE(_swing);
+}
+
 bool Bird::init()
 {
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
     auto spritecache = SpriteFrameCache::getInstance();
-
     const char* type[] = { "blue", "orange", "red" };
-    int color = _birdId != -1? _birdId : ax::RandomHelper::random_int(0, 2);
-    char birdname[32];
-    Vector<SpriteFrame*> animFrames(3);
-    for(int i=0; i<3; i++) {
-        sprintf(birdname, "bird_%s_%d.png", type[color], i);
-        auto frame = spritecache->getSpriteFrameByName(birdname);
-        animFrames.pushBack(frame);
+
+    // Pick color once
+    if (_birdId == -1) {
+        _birdId = ax::RandomHelper::random_int(0, 2);
     }
 
-    _birdId = color;
+    // 1. Create Ping-Pong Frame Sequence (0, 1, 2, 1)
+    Vector<SpriteFrame*> animFrames;
+    int indices[] = {0, 1, 2, 1};
+    for(int i : indices) {
+        std::string name = StringUtils::format("bird_%s_%d.png", type[_birdId], i);
+        auto frame = spritecache->getSpriteFrameByName(name);
+        if(frame) animFrames.pushBack(frame);
+    }
 
-    if (!initWithSpriteFrame(animFrames.front()))        return false;
+    if (animFrames.empty() || !initWithSpriteFrame(animFrames.front())) {
+        return false;
+    }
 
-    //create flap action
-    auto flapAnim = Animation::createWithSpriteFrames(animFrames, 1.0f/10);
-    auto flapAction = Animate::create(flapAnim);
-    flapAction->retain();
-    _idle = RepeatForever::create(Sequence::create(flapAction, DelayTime::create(.2f), NULL));
+    // 2. Setup Flap Animation
+    auto flapAnim = Animation::createWithSpriteFrames(animFrames, 0.1f); // 10 FPS
+
+    // 3. Create Actions
+    // Idle: Flap once, wait a bit, repeat + Swing up/down
+    auto flapOnce = Animate::create(flapAnim);
+    _idle = RepeatForever::create(Sequence::create(flapOnce, DelayTime::create(0.01f), nullptr));
     _idle->retain();
 
+    // Fly: Constant flapping
     _fly = RepeatForever::create(Animate::create(flapAnim));
     _fly->retain();
 
-    //create the swing action
-    auto moveUp = MoveBy::create(.3f, Vec2(0, 6));
-    auto moveDown = MoveBy::create(.2f, Vec2(0, -6));
-    _swing = RepeatForever::create(Sequence::create(moveUp, moveDown, NULL));
+    // Swing: Smooth sine-wave like movement
+    auto moveUp = MoveBy::create(0.3f, Vec2(0, 6));
+    auto moveDown = moveUp->reverse();
+    _swing = RepeatForever::create(Sequence::create(moveUp, moveDown, nullptr));
     _swing->retain();
 
     return true;
@@ -60,20 +75,27 @@ bool Bird::init()
 
 void Bird::idle()
 {
-    runAction(_idle);
-    runAction(_swing);
-}
+    this->stopAllActions();
 
-void Bird::stop()
-{
-    stopAllActions();
+    // Instead of running a stored pointer, we create a fresh one
+    // or clone the existing one. Cloning is the easiest fix:
+    if (_idle) {
+        this->runAction(_idle->clone()); // .clone() creates a unique copy!
+    }
+    if (_swing) {
+        this->runAction(_swing->clone());
+    }
 }
 
 void Bird::fly()
 {
-    stopAllActions();
-    runAction(_fly);
+    this->stopAllActions();
+    if (_fly) {
+        this->runAction(_fly->clone());
+    }
 }
 
-//Bird::Bird() { }
-//Bird::~Bird() { _fly->release(); _idle->release(); }
+void Bird::stop()
+{
+    this->stopAllActions();
+}

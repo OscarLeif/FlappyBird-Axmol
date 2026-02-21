@@ -29,7 +29,7 @@
 #include "axmol.h"
 
 
-class MainScene : public ax::Scene
+class HelloWorld : public ax::Scene
 {
     enum class GameState
     {
