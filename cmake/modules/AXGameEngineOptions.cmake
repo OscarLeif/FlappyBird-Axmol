@@ -3,7 +3,7 @@
 # {build_dir}/CMakeCache.txt file and then re-run the `axmol build ...` command in
 # order for the new setting to take effect. Alternatively, you can also delete the
 # entire build folder and then re-run the `axmol build` command.
-# set(AX_EXT_HINT ON CACHE BOOL "The default extensions hint" FORCE)
+ set(AX_EXT_HINT ON CACHE BOOL "The default extensions hint" FORCE)
 
 # The following are by default set the same as the AX_EXT_HINT flag above - default: ON
 # Uncomment the lines below to set them individually
@@ -14,7 +14,7 @@
 # set(AX_ENABLE_EXT_DRAGONBONES OFF CACHE BOOL "Build extension DragonBones" FORCE)
 # set(AX_ENABLE_EXT_COCOSTUDIO OFF CACHE BOOL "Build extension cocostudio" FORCE)
 # set(AX_ENABLE_EXT_FAIRYGUI OFF CACHE BOOL "Build extension FairyGUI" FORCE)
- set(AX_ENABLE_EXT_IMGUI ON CACHE BOOL "Build extension ImGui" FORCE)
+# set(AX_ENABLE_EXT_IMGUI OFF CACHE BOOL "Build extension ImGui" FORCE)
 # set(AX_ENABLE_EXT_JSONDEFAULT OFF CACHE BOOL "Build extension JSONDefault" FORCE)
 
 # 3D Support - - default: ON

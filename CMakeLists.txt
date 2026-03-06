@@ -29,14 +29,6 @@ set(APP_NAME FlappyBird)
 
 project(${APP_NAME})
 
-#set(AX_USE_LTO ON CACHE BOOL "Enable Link Time Optimization" FORCE)
-#set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
-#set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-
-#set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
-#set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -Wl,--gc-sections")
-
 if(XCODE)
   set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
 endif()
@@ -84,15 +76,6 @@ set(APP_SOURCES
 )
 
 include(AXGameTargetSetup)
-
-# ---- ADD THIS BLOCK HERE ----
-#if(ANDROID)
-#    add_custom_command(TARGET ${APP_NAME} POST_BUILD
-#        COMMAND ${CMAKE_STRIP} --strip-unneeded $<TARGET_FILE:${APP_NAME}>
-#        COMMENT "Stripping native library"
-#    )
-#endif()
-# ------------------------------
 
 # mark app resources, resource will be copy auto after mark
 ax_setup_app_config(${APP_NAME})

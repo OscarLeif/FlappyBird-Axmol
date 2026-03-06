@@ -55,7 +55,7 @@ android {
     }
 
     signingConfigs {
-        release {
+       release {
             if (project.hasProperty("KEY_STORE_FILE")) {
                 storeFile file(KEY_STORE_FILE)
                 storePassword KEY_STORE_PASSWORD
@@ -73,7 +73,6 @@ android {
             shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             proguardFile file(project(':libaxmol').projectDir.toString() + '/proguard-rules.pro')
-            signingConfig signingConfigs.debug
             if (project.hasProperty("KEY_STORE_FILE")) {
                 signingConfig signingConfigs.release
             }
@@ -86,7 +85,7 @@ android {
     }
 
     aaptOptions {
-        noCompress 'mp3','ogg','wav','mp4','ttf','ttc','otf'
+       noCompress 'mp3','ogg','wav','mp4','ttf','ttc','otf'
     }
 
     buildFeatures {
@@ -135,57 +134,6 @@ project.afterEvaluate {
 
         tasks.named("merge${variantName}Assets").configure {
             dependsOn(copyTask)
-        }
-    }
-}
-
-// Helper function to keep the code clean
-def nukeCache(Project project) {
-    println "--- NUKING CACHE ---"
-    // Maybe my mistake was on clean the build folder.
-    def targets = ["${project.projectDir}/.cxx", "${project.projectDir}/build"]
-    targets.each { path ->
-        def folder = file(path)
-        if (folder.exists()) {
-            println "Removing: ${path}"
-            folder.deleteDir()
-        }
-    }
-}
-
-tasks.register("buildDebugFresh") {
-    group = "axmol_tools"
-    description = "Cleans everything and builds a Debug APK"
-
-    // This is the magic part: it runs BEFORE the build starts
-    doFirst {
-        nukeCache(project)
-    }
-
-    dependsOn "assembleDebug"
-
-    doLast {
-        def apk = file("build/outputs/apk/debug/app-debug.apk")
-        if (apk.exists()) {
-            println "DEBUG APK READY: ${String.format("%.2f", apk.length() / 1024 / 1024)} MB"
-        }
-    }
-}
-
-tasks.register("buildReleaseFresh") {
-    group = "axmol_tools"
-    description = "Builds a Release APK"
-
-    //doFirst {
-    //    nukeCache(project)
-    //}
-
-    dependsOn "assembleRelease"
-
-    doLast {
-        def apk = file("build/outputs/apk/release/app-release.apk")
-        if (apk.exists()) {
-            println "RELEASE APK READY: ${String.format("%.2f", apk.length() / 1024 / 1024)} MB"
         }
     }
 }

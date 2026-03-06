@@ -2,7 +2,7 @@
  Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  Copyright (c) 2019-present Axmol Engine contributors (see AUTHORS.md).
 
- https://axmolengine.github.io/
+ https://axmol.dev/
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -23,13 +23,11 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef __MAIN_SCENE_H__
-#define __MAIN_SCENE_H__
+#pragma once
 
 #include "axmol.h"
 
-
-class MainScene : public ax::Scene
+class HelloWorldScene : public ax::Scene
 {
     enum class GameState
     {
@@ -51,10 +49,10 @@ public:
     void onTouchesEnded(const std::vector<ax::Touch*>& touches, ax::Event* event);
 
     // mouse
-    void onMouseDown(ax::Event* event);
-    void onMouseUp(ax::Event* event);
-    void onMouseMove(ax::Event* event);
-    void onMouseScroll(ax::Event* event);
+    bool onMouseDown(ax::Event* event);
+    bool onMouseUp(ax::Event* event);
+    bool onMouseMove(ax::Event* event);
+    bool onMouseScroll(ax::Event* event);
 
     // Keyboard
     void onKeyPressed(ax::EventKeyboard::KeyCode code, ax::Event* event);
@@ -63,8 +61,14 @@ public:
     // a selector callback
     void menuCloseCallback(ax::Object* sender);
 
+    HelloWorldScene();
+    ~HelloWorldScene() override;
+
 private:
-    GameState _gameState = GameState::init;
+    GameState _gameState                            = GameState::init;
+    ax::EventListenerTouchAllAtOnce* _touchListener = nullptr;
+    ax::EventListenerKeyboard* _keyboardListener    = nullptr;
+    ax::EventListenerMouse* _mouseListener          = nullptr;
+    int _sceneID                                    = 0;
 };
 
-#endif  // __MAIN_SCENE_H__

@@ -2,7 +2,7 @@
  Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  Copyright (c) 2019-present Axmol Engine contributors (see AUTHORS.md).
 
- https://axmolengine.github.io/
+ https://axmol.dev/
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,12 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-#include "MainScene.h"
+#include "HelloWorldScene.h"
+#include "MainMenu.h"
 
-USING_NS_AX;
+using namespace ax;
+
+static int s_sceneID = 1000;
 
 // Print useful error message instead of segfaulting when files are not there.
 static void problemLoading(const char* filename)
@@ -33,11 +36,11 @@ static void problemLoading(const char* filename)
     printf("Error while loading: %s\n", filename);
     printf(
         "Depending on how you compiled you might have to add 'Content/' in front of filenames in "
-        "MainScene.cpp\n");
+        "HelloWorldScene.cpp\n");
 }
 
 // on "init" you need to initialize your instance
-bool MainScene::init()
+bool HelloWorldScene::init()
 {
     //////////////////////////////
     // 1. super init first
@@ -47,9 +50,9 @@ bool MainScene::init()
     }
 
     auto visibleSize = _director->getVisibleSize();
-    auto origin = _director->getVisibleOrigin();
-    auto safeArea = _director->getSafeAreaRect();
-    auto safeOrigin = safeArea.origin;
+    auto origin      = _director->getVisibleOrigin();
+    auto safeArea    = _director->getSafeAreaRect();
+    auto safeOrigin  = safeArea.origin;
 
     /////////////////////////////
     // 2. add a menu item with "X" image, which is clicked to quit the program
@@ -57,7 +60,7 @@ bool MainScene::init()
 
     // add a "close" icon to exit the progress. it's an autorelease object
     auto closeItem = MenuItemImage::create("CloseNormal.png", "CloseSelected.png",
-        AX_CALLBACK_1(MainScene::menuCloseCallback, this));
+                                           AX_CALLBACK_1(HelloWorldScene::menuCloseCallback, this));
 
     if (closeItem == nullptr || closeItem->getContentSize().width <= 0 || closeItem->getContentSize().height <= 0)
     {
@@ -79,25 +82,23 @@ bool MainScene::init()
     // 3. add your codes below...
 
     // Some templates (uncomment what you  need)
-    auto touchListener = EventListenerTouchAllAtOnce::create();
-    touchListener->onTouchesBegan = AX_CALLBACK_2(MainScene::onTouchesBegan, this);
-    touchListener->onTouchesMoved = AX_CALLBACK_2(MainScene::onTouchesMoved, this);
-    touchListener->onTouchesEnded = AX_CALLBACK_2(MainScene::onTouchesEnded, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
+    _touchListener                 = EventListenerTouchAllAtOnce::create();
+    _touchListener->onTouchesBegan = AX_CALLBACK_2(HelloWorldScene::onTouchesBegan, this);
+    _touchListener->onTouchesMoved = AX_CALLBACK_2(HelloWorldScene::onTouchesMoved, this);
+    _touchListener->onTouchesEnded = AX_CALLBACK_2(HelloWorldScene::onTouchesEnded, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(_touchListener, this);
 
-    //auto mouseListener           = EventListenerMouse::create();
-    //mouseListener->onMouseMove   = AX_CALLBACK_1(MainScene::onMouseMove, this);
-    //mouseListener->onMouseUp     = AX_CALLBACK_1(MainScene::onMouseUp, this);
-    //mouseListener->onMouseDown   = AX_CALLBACK_1(MainScene::onMouseDown, this);
-    //mouseListener->onMouseScroll = AX_CALLBACK_1(MainScene::onMouseScroll, this);
-    //_eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
+    //_mouseListener                = EventListenerMouse::create();
+    //_mouseListener->onMouseMove   = AX_CALLBACK_1(HelloWorldScene::onMouseMove, this);
+    //_mouseListener->onMouseUp     = AX_CALLBACK_1(HelloWorldScene::onMouseUp, this);
+    //_mouseListener->onMouseDown   = AX_CALLBACK_1(HelloWorldScene::onMouseDown, this);
+    //_mouseListener->onMouseScroll = AX_CALLBACK_1(HelloWorldScene::onMouseScroll, this);
+    //_eventDispatcher->addEventListenerWithSceneGraphPriority(_mouseListener, this);
 
-    //auto keyboardListener           = EventListenerKeyboard::create();
-    //keyboardListener->onKeyPressed  = AX_CALLBACK_2(MainScene::onKeyPressed, this);
-    //keyboardListener->onKeyReleased = AX_CALLBACK_2(MainScene::onKeyReleased, this);
-    //_eventDispatcher->addEventListenerWithFixedPriority(keyboardListener, 11);
-
-
+    _keyboardListener                = EventListenerKeyboard::create();
+    _keyboardListener->onKeyPressed  = AX_CALLBACK_2(HelloWorldScene::onKeyPressed, this);
+    _keyboardListener->onKeyReleased = AX_CALLBACK_2(HelloWorldScene::onKeyReleased, this);
+    _eventDispatcher->addEventListenerWithFixedPriority(_keyboardListener, 11);
 
     // add a label shows "Hello World"
     // create and initialize a label
@@ -142,66 +143,69 @@ bool MainScene::init()
     return true;
 }
 
-
-void MainScene::onTouchesBegan(const std::vector<ax::Touch*>& touches, ax::Event* event)
+void HelloWorldScene::onTouchesBegan(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
     for (auto&& t : touches)
     {
-        AXLOG("onTouchesBegan detected, X:%f  Y:%f", t->getLocation().x, t->getLocation().y);
+        // AXLOGD("onTouchesBegan detected, X:{}  Y:{}", t->getLocation().x, t->getLocation().y);
     }
 }
 
-void MainScene::onTouchesMoved(const std::vector<ax::Touch*>& touches, ax::Event* event)
+void HelloWorldScene::onTouchesMoved(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
     for (auto&& t : touches)
     {
-        AXLOG("onTouchesMoved detected, X:%f  Y:%f", t->getLocation().x, t->getLocation().y);
+        // AXLOGD("onTouchesMoved detected, X:{}  Y:{}", t->getLocation().x, t->getLocation().y);
     }
 }
 
-void MainScene::onTouchesEnded(const std::vector<ax::Touch*>& touches, ax::Event* event)
+void HelloWorldScene::onTouchesEnded(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
     for (auto&& t : touches)
     {
-        AXLOG("onTouchesEnded detected, X:%f  Y:%f", t->getLocation().x, t->getLocation().y);
+        // AXLOGD("onTouchesEnded detected, X:{}  Y:{}", t->getLocation().x, t->getLocation().y);
     }
 }
 
-void MainScene::onMouseDown(Event* event)
+bool HelloWorldScene::onMouseDown(Event* event)
 {
     EventMouse* e = static_cast<EventMouse*>(event);
-    AXLOG("onMouseDown detected, Key: %d", static_cast<int>(e->getMouseButton()));
+    // AXLOGD("onMouseDown detected, button: {}", static_cast<int>(e->getMouseButton()));
+    return true;
 }
 
-void MainScene::onMouseUp(Event* event)
+bool HelloWorldScene::onMouseUp(Event* event)
 {
     EventMouse* e = static_cast<EventMouse*>(event);
-    AXLOG("onMouseUp detected, Key: %d", static_cast<int>(e->getMouseButton()));
+    AXLOGD("onMouseUp detected, button: {}", static_cast<int>(e->getMouseButton()));
+    return true;
 }
 
-void MainScene::onMouseMove(Event* event)
+bool HelloWorldScene::onMouseMove(Event* event)
 {
     EventMouse* e = static_cast<EventMouse*>(event);
-    AXLOG("onMouseMove detected, X:%f  Y:%f", e->getCursorX(), e->getCursorY());
+    // AXLOGD("onMouseMove detected, X:{}  Y:{}", e->getLocation().x, e->getLocation().y);
+    return true;
 }
 
-void MainScene::onMouseScroll(Event* event)
+bool HelloWorldScene::onMouseScroll(Event* event)
 {
     EventMouse* e = static_cast<EventMouse*>(event);
-    AXLOG("onMouseScroll detected, X:%f  Y:%f", e->getScrollX(), e->getScrollY());
+    // AXLOGD("onMouseScroll detected, X:{}  Y:{}", e->getScrollX(), e->getScrollY());
+    return true;
 }
 
-void MainScene::onKeyPressed(EventKeyboard::KeyCode code, Event* event)
+void HelloWorldScene::onKeyPressed(EventKeyboard::KeyCode code, Event* event)
 {
-    AXLOG("onKeyPressed, keycode: %d", static_cast<int>(code));
+    AXLOGD("Scene: #{} onKeyPressed, keycode: {}", _sceneID, static_cast<int>(code));
 }
 
-void MainScene::onKeyReleased(EventKeyboard::KeyCode code, Event* event)
+void HelloWorldScene::onKeyReleased(EventKeyboard::KeyCode code, Event* event)
 {
-    AXLOG("onKeyReleased, keycode: %d", static_cast<int>(code));
+    AXLOGD("onKeyReleased, keycode: {}", static_cast<int>(code));
 }
 
-void MainScene::update(float delta)
+void HelloWorldScene::update(float delta)
 {
     switch (_gameState)
     {
@@ -234,7 +238,7 @@ void MainScene::update(float delta)
     }
 
     case GameState::menu1:
-    {    /////////////////////////////
+    {  /////////////////////////////
         // Add your codes below...like....
         //
         // UpdateMenu1();
@@ -242,7 +246,7 @@ void MainScene::update(float delta)
     }
 
     case GameState::menu2:
-    {    /////////////////////////////
+    {  /////////////////////////////
         // Add your codes below...like....
         //
         // UpdateMenu2();
@@ -250,7 +254,7 @@ void MainScene::update(float delta)
     }
 
     case GameState::end:
-    {    /////////////////////////////
+    {  /////////////////////////////
         // Add your codes below...like....
         //
         // CleanUpMyCrap();
@@ -258,10 +262,10 @@ void MainScene::update(float delta)
         break;
     }
 
-    } //switch
+    }  // switch
 }
 
-void MainScene::menuCloseCallback(ax::Object* sender)
+void HelloWorldScene::menuCloseCallback(ax::Object* sender)
 {
     // Close the axmol game scene and quit the application
     _director->end();
@@ -270,6 +274,25 @@ void MainScene::menuCloseCallback(ax::Object* sender)
      * _director->end() as given above,instead trigger a custom event created in RootViewController.mm
      * as below*/
 
-     // EventCustom customEndEvent("game_scene_close_event");
-     //_eventDispatcher->dispatchEvent(&customEndEvent);
+    // EventCustom customEndEvent("game_scene_close_event");
+    //_eventDispatcher->dispatchEvent(&customEndEvent);
+}
+
+HelloWorldScene::HelloWorldScene()
+{
+    _sceneID = ++s_sceneID;
+    AXLOGD("Scene: ctor: #{}", _sceneID);
+}
+
+HelloWorldScene::~HelloWorldScene()
+{
+    AXLOGD("~Scene: dtor: #{}", _sceneID);
+
+    if (_touchListener)
+        _eventDispatcher->removeEventListener(_touchListener);
+    if (_keyboardListener)
+        _eventDispatcher->removeEventListener(_keyboardListener);
+    if (_mouseListener)
+        _eventDispatcher->removeEventListener(_mouseListener);
+    _sceneID = -1;
 }

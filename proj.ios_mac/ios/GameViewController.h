@@ -1,4 +1,6 @@
 /****************************************************************************
+ Copyright (c) 2013      cocos2d-x.org
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
  Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  Copyright (c) 2019-present Axmol Engine contributors (see AUTHORS.md).
 
@@ -22,34 +24,11 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
+#pragma once
 
-#include "AppDelegate.h"
-#include "axmol.h"
+#import "platform/ios/AxmolViewController.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string>
-
-using namespace ax;
-
-namespace
-{
-std::unique_ptr<AppDelegate> appDelegate;
+@interface GameViewController : AxmolViewController {
 }
 
-void axmol_wasm_app_exit() 
-{
-    appDelegate = nullptr;
-
-#if AX_OBJECT_LEAK_DETECTION
-    Object::printLeaks();
-#endif
-}
-
-int main(int argc, char** argv)
-{
-    // create the application instance
-    appDelegate.reset(new AppDelegate());
-    return Application::getInstance()->run();
-}
+@end

@@ -2,7 +2,7 @@
  Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  Copyright (c) 2019-present Axmol Engine contributors (see AUTHORS.md).
 
- https://axmolengine.github.io/
+ https://axmol.dev/
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,8 @@
  ****************************************************************************/
 
 #include "AppDelegate.h"
-#include "MainScene.h"
-#include "WelcomeScene.h"
+#include "HelloWorldScene.h"
+#include "MainMenu.h"
 
 #define USE_AUDIO_ENGINE 1
 
@@ -35,12 +35,7 @@
 
 using namespace ax;
 
-#include "Inspector/Inspector.h"
-#if AX_ENABLE_EXT_IMGUI
-
-#endif
-
-static ax::Size designResolutionSize = ax::Size(720, 1280);//default (1280,720)
+static ax::Size designResolutionSize = ax::Size(1280, 720);
 
 AppDelegate::AppDelegate() {}
 
@@ -67,10 +62,10 @@ bool AppDelegate::applicationDidFinishLaunching()
     {
 #if (AX_TARGET_PLATFORM == AX_PLATFORM_WIN32) || (AX_TARGET_PLATFORM == AX_PLATFORM_MAC) || \
     (AX_TARGET_PLATFORM == AX_PLATFORM_LINUX)
-        renderView = RenderViewImpl::createWithRect("FlappyBird", ax::Rect(0, 0, designResolutionSize.width, designResolutionSize.height), 1.0F, true);
-        //glView = GLViewImpl::create("FlappyBird", true);  // Android means use fullscreen resolution this will not work on new versions
+        renderView = RenderViewImpl::createWithRect(
+            "FlappyBird", ax::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 #else
-        renderView = RenderViewImpl::createWithFullScreen("FlappyBird"); // Android means use fullscreen resolution
+        renderView = RenderViewImpl::createWithFullScreen("FlappyBird");
 #endif
         director->setRenderView(renderView);
     }
@@ -81,31 +76,19 @@ bool AppDelegate::applicationDidFinishLaunching()
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0f / 60);
 
-    auto frameSize = renderView->getFrameSize(); // Use FrameSize for physical aspect ratio
-    float aspectRatio = frameSize.width / frameSize.height;
+    // Set the design resolution
+    renderView->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height,
+                                    ResolutionPolicy::SHOW_ALL);
 
-    if (aspectRatio > 1.0f) {
-        // Landscape (TV)
-        renderView->setDesignResolutionSize(1280, 720, ResolutionPolicy::FIXED_HEIGHT);
-    } else {
-        // Portrait (Phone)
-        renderView->setDesignResolutionSize(720, 1280, ResolutionPolicy::FIXED_WIDTH);
-    }
+    auto spritecache = SpriteFrameCache::getInstance();
+    spritecache->addSpriteFramesWithFile("flappy.plist");
 
-    auto sharedFileUtils = FileUtils::getInstance();
-    std::vector<std::string> searchPaths;
-
-    searchPaths.push_back("audio");
-    sharedFileUtils->setSearchPaths(searchPaths);
-
-    // create a scene. it's an autorelease object
-    //auto scene = utils::createInstance<MainScene>();
-
-    auto welcomeScene = utils::createInstance<WelcomeScene>();
+    // create a helloWorld_scene. it's an autorelease object
+    //auto helloWorld_scene = utils::createInstance<HelloWorldScene>();
+    auto mainMenuScene = utils::createInstance<MainMenu>();
 
     // run
-    director->runWithScene(welcomeScene);
-
+    director->runWithScene(mainMenuScene);
 
     return true;
 }
@@ -152,3 +135,6 @@ void AppDelegate::applicationScreenSizeChanged(int newWidth, int newHeight)
     }
 }
 #endif
+
+
+void AppDelegate::applicationWillQuit() {}

@@ -1,8 +1,7 @@
 /****************************************************************************
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  Copyright (c) 2019-present Axmol Engine contributors (see AUTHORS.md).
 
- https://axmol.dev/
+https://axmol.dev/
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -22,34 +21,12 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-
+#import <UIKit/UIKit.h>
 #include "AppDelegate.h"
-#include "axmol.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string>
-
-using namespace ax;
-
-namespace
-{
-std::unique_ptr<AppDelegate> appDelegate;
-}
-
-void axmol_wasm_app_exit() 
-{
-    appDelegate = nullptr;
-
-#if AX_OBJECT_LEAK_DETECTION
-    Object::printLeaks();
-#endif
-}
-
-int main(int argc, char** argv)
-{
-    // create the application instance
-    appDelegate.reset(new AppDelegate());
-    return Application::getInstance()->run();
+int main(int argc, char *argv[]) {
+    AppDelegate app;
+    @autoreleasepool {
+        return UIApplicationMain(argc, argv, nil, @"GameAppController");
+    }
 }
